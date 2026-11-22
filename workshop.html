@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>التقديم لورشة MAFAP للتمثيل السينمائي</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #181b22;
+      --input-bg: #222630;
+      --locked-bg: #14171d;
+      --border: #2e3442;
+      --primary: #e5a93c;
+      --primary-hover: #f3b84c;
+      --text: #f1f3f7;
+      --muted: #9aa2b1;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      width: 100%;
+      max-width: 560px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 18px;
+    }
+    .brand {
+      display: inline-block;
+      background: rgba(229, 169, 60, 0.15);
+      color: var(--primary);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 6px;
+    }
+    .step { display: none; }
+    .step.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .form-group { margin-bottom: 16px; }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .opt { color: var(--muted); font-weight: 400; font-size: 12px; }
+    .lock-badge {
+      font-size: 11px;
+      background: #2a2f3d;
+      color: var(--muted);
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-right: 6px;
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="tel"],
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+      transition: 0.2s;
+    }
+    input:focus, select:focus { border-color: var(--primary); }
+    input[readonly], input:disabled {
+      background: var(--locked-bg);
+      color: #b4bccb;
+      border-color: #232733;
+      cursor: not-allowed;
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #111;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-top: 8px;
+    }
+    .btn:hover { background: var(--primary-hover); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      margin-top: 10px;
+      font-weight: 600;
+    }
+    .btn-secondary:hover { border-color: var(--text); color: var(--text); background: transparent; }
+
+    .alert {
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .alert.error { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: #fca5a5; display: block; }
+    .alert.info { background: rgba(229, 169, 60, 0.12); border: 1px solid var(--primary); color: #fde68a; display: block; }
+
+    .payment-box {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+    .pay-method {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .pay-method:last-child { border-bottom: none; padding-bottom: 0; }
+    .pay-title { font-size: 13px; color: var(--muted); }
+    .pay-num { font-size: 17px; font-weight: 700; color: var(--primary); direction: ltr; }
+    .copy-btn {
+      background: #2d3343;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .copy-btn:hover { background: #3b4357; }
+
+    .file-upload {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+      background: var(--input-bg);
+    }
+    .file-upload:hover { border-color: var(--primary); }
+    .file-upload input { display: none; }
+    .preview-img {
+      max-width: 140px;
+      max-height: 140px;
+      border-radius: 10px;
+      margin-top: 10px;
+      display: none;
+      border: 1px solid var(--border);
+    }
+
+    .status-card {
+      text-align: center;
+      padding: 20px 10px;
+    }
+    .status-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    .badge.pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid var(--warning); }
+    .badge.confirmed { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); }
+    .badge.rejected { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <span class="brand">MAFAP PRODUCTION</span>
+    <h1>التقديم لورشة MAFAP للتمثيل السينمائي</h1>
+    <p class="subtitle">بوابة تسجيل المتدربين وتأكيد الحجز</p>
+  </div>
+
+  <div id="alertBox" class="alert"></div>
+
+  <!-- الخطوة 1: إدخال الكود -->
+  <div id="stepCode" class="step active">
+    <div class="form-group">
+      <label for="codeInput">كود المتدرب الخاص بك</label>
+      <input type="text" id="codeInput" placeholder="أدخل الكود المرسل إليك (مثال: MAFAP-101)" style="text-align:center; font-weight:700; letter-spacing:1px;" />
+    </div>
+    <button class="btn" id="verifyCodeBtn">دخول لصفحة التقديم</button>
+  </div>
+
+  <!-- الخطوة 2: استكمال البيانات -->
+  <div id="stepForm" class="step">
+    <div class="form-group">
+      <label>الاسم بالكامل <span class="lock-badge">مسجل من الإدارة</span></label>
+      <input type="text" id="lockedName" readonly />
+    </div>
+
+    <div class="row">
+      <div class="form-group">
+        <label>النوع <span class="lock-badge">مسجل</span></label>
+        <input type="text" id="lockedGender" readonly />
+      </div>
+      <div class="form-group">
+        <label>رقم الموبايل الأساسي <span class="lock-badge">مسجل</span></label>
+        <input type="text" id="lockedPhone" readonly dir="ltr" style="text-align:right;" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="extraPhone">رقم موبايل إضافي <span class="opt">(اختياري)</span></label>
+      <input type="tel" id="extraPhone" placeholder="01xxxxxxxxx" />
+    </div>
+
+    <div class="row">
+      <div class="form-group">
+        <label for="ageInput">السن <span style="color:var(--danger)">*</span></label>
+        <input type="number" id="ageInput" min="10" max="90" placeholder="مثال: 24" required />
+      </div>
+      <div class="form-group">
+        <label for="nationalityInput">الجنسية <span style="color:var(--danger)">*</span></label>
+        <input type="text" id="nationalityInput" placeholder="مثال: مصري" required />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>صورة شخصية <span class="opt">(اختياري)</span></label>
+      <label class="file-upload" for="personalPhotoInput">
+        <div>اضغط لاختيار صورة شخصية (JPG / PNG)</div>
+        <input type="file" id="personalPhotoInput" accept="image/*" />
+        <center><img id="personalPhotoPreview" class="preview-img" alt="معاينة الصورة" /></center>
+      </label>
+    </div>
+
+    <button class="btn" id="toPaymentBtn">التالي: الانتقال لصفحة الدفع</button>
+  </div>
+
+  <!-- الخطوة 3: صفحة الدفع -->
+  <div id="stepPayment" class="step">
+    <div class="alert info" style="display:block;">
+      لتأكيد جدية الحجز وحضور الورشة، يرجى دفع مبلغ <strong>ديبوزت (بحد أدنى 100 جنيه مصري)</strong> على أحد الحسابات التالية ثم رفع صورة التحويل.
+    </div>
+
+    <div class="payment-box">
+      <div class="pay-method">
+        <div>
+          <div class="pay-title">تحويل إنستا باي (InstaPay)</div>
+          <div class="pay-num" id="displayInstapay">جاري التحميل...</div>
+        </div>
+        <button type="button" class="copy-btn" onclick="copyText('displayInstapay')">نسخ</button>
+      </div>
+      <div class="pay-method">
+        <div>
+          <div class="pay-title">محفظة فودافون كاش (Vodafone Cash)</div>
+          <div class="pay-num" id="displayVodafone">جاري التحميل...</div>
+        </div>
+        <button type="button" class="copy-btn" onclick="copyText('displayVodafone')">نسخ</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="depositAmount">المبلغ المدفوع بالجنيه المصري <span style="color:var(--danger)">*</span></label>
+      <input type="number" id="depositAmount" min="100" placeholder="أدخل المبلغ (الحد الأدنى 100 جنيه)" />
+      <small style="color:var(--muted); font-size:12px;">لا يقبل النظام أي مبلغ أقل من 100 جنيه.</small>
+    </div>
+
+    <div class="form-group">
+      <label>سكرين شوت / إيصال التحويل <span style="color:var(--danger)">*</span></label>
+      <label class="file-upload" for="receiptInput">
+        <div>اضغط لرفع صورة التحويل (إجباري)</div>
+        <input type="file" id="receiptInput" accept="image/*" />
+        <center><img id="receiptPreview" class="preview-img" alt="معاينة الإيصال" /></center>
+      </label>
+    </div>
+
+    <button class="btn" id="submitAllBtn">إرسال البيانات وتأكيد الدفع</button>
+    <button type="button" class="btn btn-secondary" id="backToFormBtn">رجوع لتعديل البيانات</button>
+  </div>
+
+  <!-- الخطوة 4: حالة الطلب -->
+  <div id="stepStatus" class="step">
+    <div class="status-card">
+      <div class="status-icon" id="statusIcon">⏳</div>
+      <h2 id="statusTitle" style="margin:0 0 8px 0;">تم استلام بياناتك وإيصال الدفع</h2>
+      <p id="statusDesc" style="color:var(--muted); font-size:14px; line-height:1.7;"></p>
+      <div id="statusBadge" class="badge pending">قيد مراجعة الإدارة</div>
+      <div id="reuploadArea" style="display:none; margin-top:20px;">
+        <button class="btn" id="retryBtn">تحديث البيانات وإعادة رفع الإيصال</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { firebaseConfig } from "./firebase-config.js";
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let currentCode = "";
+  let applicantData = null;
+  let personalPhotoBase64 = "";
+  let receiptBase64 = "";
+
+  const alertBox = document.getElementById("alertBox");
+  function showAlert(msg, type = "error") {
+    alertBox.textContent = msg;
+    alertBox.className = `alert ${type}`;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function clearAlert() {
+    alertBox.className = "alert";
+    alertBox.textContent = "";
+  }
+
+  function showStep(stepId) {
+    clearAlert();
+    document.querySelectorAll(".step").forEach(el => el.classList.remove("active"));
+    document.getElementById(stepId).classList.add("active");
+  }
+
+  // ضغط الصور تلقائياً لتعمل بسلاسة وسرعة فائقة
+  function compressImage(file, maxWidth = 850, quality = 0.72) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let w = img.width;
+          let h = img.height;
+          if (w > maxWidth) {
+            h = Math.round((h * maxWidth) / w);
+            w = maxWidth;
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // معاينة الصورة الشخصية
+  document.getElementById("personalPhotoInput").addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    personalPhotoBase64 = await compressImage(file, 700, 0.75);
+    const prev = document.getElementById("personalPhotoPreview");
+    prev.src = personalPhotoBase64;
+    prev.style.display = "block";
+  });
+
+  // معاينة صورة الإيصال
+  document.getElementById("receiptInput").addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    receiptBase64 = await compressImage(file, 950, 0.75);
+    const prev = document.getElementById("receiptPreview");
+    prev.src = receiptBase64;
+    prev.style.display = "block";
+  });
+
+  // التحقق من الكود
+  document.getElementById("verifyCodeBtn").addEventListener("click", async () => {
+    const rawCode = document.getElementById("codeInput").value.trim().toUpperCase();
+    if (!rawCode) {
+      showAlert("من فضلك أدخل الكود الخاص بك أولاً.");
+      return;
+    }
+
+    const btn = document.getElementById("verifyCodeBtn");
+    btn.disabled = true;
+    btn.textContent = "جاري التحقق...";
+
+    try {
+      const docRef = doc(db, "applicants", rawCode);
+      const snap = await getDoc(docRef);
+
+      if (!snap.exists()) {
+        showAlert("الكود غير صحيح أو غير مسجل. تأكد من الكود المرسل إليك من الإدارة.");
+        btn.disabled = false;
+        btn.textContent = "دخول لصفحة التقديم";
+        return;
+      }
+
+      currentCode = rawCode;
+      applicantData = snap.data();
+
+      // تعبئة البيانات المقفولة
+      document.getElementById("lockedName").value = applicantData.name || "";
+      document.getElementById("lockedGender").value = applicantData.gender || "";
+      document.getElementById("lockedPhone").value = applicantData.phone || "";
+
+      // إذا كان المتدرب قد أرسل بياناته بالفعل
+      if (applicantData.status === "pending_review" || applicantData.status === "confirmed" || applicantData.status === "rejected") {
+        renderStatusScreen(applicantData);
+        showStep("stepStatus");
+      } else {
+        showStep("stepForm");
+      }
+    } catch (err) {
+      console.error(err);
+      showAlert("حدث خطأ في الاتصال بقاعدة البيانات. تأكد من الإنترنت أو إعدادات Firebase.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "دخول لصفحة التقديم";
+    }
+  });
+
+  function renderStatusScreen(data) {
+    const icon = document.getElementById("statusIcon");
+    const title = document.getElementById("statusTitle");
+    const desc = document.getElementById("statusDesc");
+    const badge = document.getElementById("statusBadge");
+    const reuploadArea = document.getElementById("reuploadArea");
+
+    reuploadArea.style.display = "none";
+
+    if (data.status === "confirmed") {
+      icon.textContent = "✅";
+      title.textContent = `أهلاً بك يا ${data.name} — تم تأكيد حجزك بنجاح!`;
+      desc.textContent = `تمت مراجعة وتأكيد تحويل مبلغ ${data.depositAmount} جنيه مصري بنجاح. حجزك مؤكد في ورشة MAFAP للتمثيل السينمائي.`;
+      badge.className = "badge confirmed";
+      badge.textContent = "تم تأكيد الحجز";
+    } else if (data.status === "rejected") {
+      icon.textContent = "⚠️";
+      title.textContent = "يوجد مشكلة في إيصال التحويل";
+      desc.textContent = "لم يتم تأكيد التحويل من قبل الإدارة. يرجى التأكد من صحة التحويل وإعادة رفع الإيصال.";
+      badge.className = "badge rejected";
+      badge.textContent = "مرفوض — يرجى إعادة الرفع";
+      reuploadArea.style.display = "block";
+    } else {
+      icon.textContent = "⏳";
+      title.textContent = `شكراً لك يا ${data.name}`;
+      desc.textContent = `تم استلام بياناتك وإيصال تحويل مبلغ ${data.depositAmount} جنيه. سيتم تأكيد حجزك فور مراجعة الإدارة للتحويل.`;
+      badge.className = "badge pending";
+      badge.textContent = "قيد مراجعة التحويل";
+    }
+  }
+
+  document.getElementById("retryBtn").addEventListener("click", () => {
+    document.getElementById("extraPhone").value = applicantData.extraPhone || "";
+    document.getElementById("ageInput").value = applicantData.age || "";
+    document.getElementById("nationalityInput").value = applicantData.nationality || "";
+    showStep("stepForm");
+  });
+
+  // الانتقال لصفحة الدفع
+  document.getElementById("toPaymentBtn").addEventListener("click", async () => {
+    const age = Number(document.getElementById("ageInput").value);
+    const nationality = document.getElementById("nationalityInput").value.trim();
+
+    if (!age || age < 10 || age > 90) {
+      showAlert("من فضلك أدخل السن بشكل صحيح.");
+      return;
+    }
+    if (!nationality) {
+      showAlert("من فضلك أدخل الجنسية.");
+      return;
+    }
+
+    // جلب أرقام الدفع من إعدادات الأدمن
+    try {
+      const settingsSnap = await getDoc(doc(db, "settings", "payment"));
+      if (settingsSnap.exists()) {
+        const s = settingsSnap.data();
+        document.getElementById("displayInstapay").textContent = s.instapay || "غير متاح حالياً";
+        document.getElementById("displayVodafone").textContent = s.vodafone || "غير متاح حالياً";
+      } else {
+        document.getElementById("displayInstapay").textContent = "لم يتم تحديد الرقم بعد";
+        document.getElementById("displayVodafone").textContent = "لم يتم تحديد الرقم بعد";
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    showStep("stepPayment");
+  });
+
+  document.getElementById("backToFormBtn").addEventListener("click", () => {
+    showStep("stepForm");
+  });
+
+  // الإرسال النهائي
+  document.getElementById("submitAllBtn").addEventListener("click", async () => {
+    const amount = Number(document.getElementById("depositAmount").value);
+
+    if (!amount || isNaN(amount) || amount < 100) {
+      showAlert("عذراً، الحد الأدنى للديبوزت هو 100 جنيه مصري. لا يمكن قبول مبلغ أقل.");
+      return;
+    }
+    if (!receiptBase64) {
+      showAlert("من فضلك قم برفع صورة (سكرين شوت) التحويل أولاً لتأكيد الطلب.");
+      return;
+    }
+
+    const btn = document.getElementById("submitAllBtn");
+    btn.disabled = true;
+    btn.textContent = "جاري رفع البيانات والإيصال...";
+
+    try {
+      const updatedPayload = {
+        // نحتفظ بالاسم والنوع والموبايل الأساسي كما سجلهم الأدمن دون أي تعديل
+        name: applicantData.name,
+        gender: applicantData.gender,
+        phone: applicantData.phone,
+        extraPhone: document.getElementById("extraPhone").value.trim(),
+        age: Number(document.getElementById("ageInput").value),
+        nationality: document.getElementById("nationalityInput").value.trim(),
+        personalPhoto: personalPhotoBase64 || applicantData.personalPhoto || "",
+        depositAmount: amount,
+        receiptPhoto: receiptBase64,
+        status: "pending_review",
+        submittedAt: serverTimestamp()
+      };
+
+      await updateDoc(doc(db, "applicants", currentCode), updatedPayload);
+      applicantData = { ...applicantData, ...updatedPayload };
+      renderStatusScreen(applicantData);
+      showStep("stepStatus");
+    } catch (err) {
+      console.error(err);
+      showAlert("حدث خطأ أثناء إرسال البيانات. حاول مرة أخرى.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "إرسال البيانات وتأكيد الدفع";
+    }
+  });
+
+  window.copyText = function(elementId) {
+    const text = document.getElementById(elementId).textContent;
+    navigator.clipboard.writeText(text);
+    alert("تم نسخ الرقم: " + text);
+  };
+</script>
+</body>
+</html>
