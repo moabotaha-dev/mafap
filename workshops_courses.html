@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MAFAP | الورش والتدريب</title>
+  <link rel="icon" type="image/png" href="MAFAP White bg.png" />
+  <link rel="apple-touch-icon" href="MAFAP White bg.png" />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#0a0a0c',
+            surface: '#121216',
+            amberGold: '#d4af37',
+            amberWarm: '#e5c158',
+          },
+          fontFamily: {
+            arabic: ['Cairo', 'sans-serif'],
+            english: ['Plus Jakarta Sans', 'sans-serif'],
+            display: ['Space Grotesk', 'Cairo', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0a0a0c;
+      color: #f4f4f5;
+      overflow-x: hidden;
+    }
+    html[dir="rtl"] body { font-family: 'Cairo', sans-serif; }
+    html[dir="ltr"] body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Subtle Film Grain */
+    .film-grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 40;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    .glass-nav {
+      background: rgba(10, 10, 12, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .glass-card {
+      background: linear-gradient(145deg, rgba(24, 24, 31, 0.72), rgba(18, 18, 22, 0.94));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      border-color: rgba(212, 175, 55, 0.5);
+      transform: translateY(-4px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-amberGold selection:text-black">
+
+  <div class="film-grain" aria-hidden="true"></div>
+
+  <!-- ==================== 1. MINIMAL NAVBAR ==================== -->
+  <header class="sticky top-0 z-50 glass-nav">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+      
+      <!-- Brand Logo (Links back to Main Site) -->
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-surface border border-white/10 flex items-center justify-center group-hover:border-amberGold/60 transition-colors">
+          <svg class="w-5 h-5 text-amberGold" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="14.31" y1="8" x2="20.05" y2="17.94"/>
+            <line x1="9.69" y1="8" x2="21.17" y2="8"/>
+            <line x1="7.38" y1="12" x2="13.12" y2="2.06"/>
+            <line x1="9.69" y1="16" x2="3.95" y2="6.06"/>
+            <line x1="14.31" y1="16" x2="2.83" y2="16"/>
+            <line x1="16.62" y1="12" x2="10.88" y2="21.94"/>
+          </svg>
+        </div>
+        <span class="font-display font-bold text-2xl tracking-wider text-white">MAFAP</span>
+      </a>
+
+      <!-- Actions: Language Toggle & Back to Main Site -->
+      <div class="flex items-center gap-2.5 sm:gap-3">
+        <button onclick="toggleLanguage()" class="px-3.5 py-2 rounded-xl text-xs font-bold uppercase bg-surface hover:bg-zinc-800 text-zinc-200 border border-white/10 hover:border-amberGold/50 transition-all">
+          <span id="langLabel">EN</span>
+        </button>
+
+        <a href="index.html" class="px-4 sm:px-5 py-2.5 rounded-xl bg-amberGold hover:bg-amberWarm text-zinc-950 font-bold text-xs sm:text-sm transition-all flex items-center gap-2">
+          <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          <span data-i18n="nav_back">الموقع الرئيسي</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== 2. COMPACT PAGE HEADER ==================== -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    
+    <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-14">
+      <h1 class="text-3xl sm:text-5xl font-extrabold text-white mb-3" data-i18n="page_title">
+        ورش وكورسات MAFAP
+      </h1>
+      <p class="text-zinc-400 text-sm sm:text-base" data-i18n="page_subtitle">
+        برامج تدريبية عملية في صناعة السينما والتمثيل بإشراف شركة مصطفى ابوطه للإنتاج الفني.
+      </p>
+    </div>
+
+    <!-- ==================== 3. SIMPLE WORKSHOPS GRID ==================== -->
+    <div id="workshopsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-7">
+      <!-- Cards rendered cleanly by JS -->
+    </div>
+
+  </main>
+
+  <!-- ==================== 4. MINIMALIST FOOTER ==================== -->
+  <footer class="py-12 bg-surface/60 border-t border-white/[0.06] mt-auto">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        
+        <!-- Logo & Full Name -->
+        <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-start">
+          <a href="index.html" class="font-display font-bold text-2xl tracking-wider text-white hover:text-amberGold transition-colors">MAFAP</a>
+          <span class="hidden sm:inline text-zinc-600">|</span>
+          <span class="text-sm text-zinc-400" data-i18n="footer_tagline">شركة مصطفى ابوطه للإنتاج الفني</span>
+        </div>
+
+        <!-- Footer Social Icons -->
+        <div class="flex items-center gap-3">
+          <a href="https://www.facebook.com/mafap.eg" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="w-10 h-10 rounded-xl bg-obsidian/80 border border-white/10 hover:border-amberGold/50 text-zinc-400 hover:text-amberGold flex items-center justify-center transition-all">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/>
+            </svg>
+          </a>
+          <a href="https://www.youtube.com/@MAFAP-eg" target="_blank" rel="noopener noreferrer" aria-label="YouTube" class="w-10 h-10 rounded-xl bg-obsidian/80 border border-white/10 hover:border-amberGold/50 text-zinc-400 hover:text-amberGold flex items-center justify-center transition-all">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+          </a>
+          <a href="https://www.instagram.com/mafap.eg/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="w-10 h-10 rounded-xl bg-obsidian/80 border border-white/10 hover:border-amberGold/50 text-zinc-400 hover:text-amberGold flex items-center justify-center transition-all">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Copyright -->
+        <div class="text-xs sm:text-sm text-zinc-500 text-center" data-i18n="footer_copy">
+          © 2026 MAFAP — Mostafa Abotaha for Artistic Production. جميع الحقوق محفوظة.
+        </div>
+
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== 5. FOCUSED DETAILS & WHATSAPP MODAL ==================== -->
+  <div id="workshopModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="relative w-full max-w-lg rounded-3xl bg-surface border border-white/15 overflow-hidden shadow-2xl">
+      
+      <!-- Modal Image -->
+      <div class="relative aspect-video bg-obsidian">
+        <img id="modalImg" src="" alt="Workshop" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-black/30"></div>
+        
+        <button onclick="closeModal()" class="absolute top-4 end-4 p-2 rounded-xl bg-obsidian/80 text-zinc-200 hover:text-amberGold border border-white/10" aria-label="Close">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+
+        <span id="modalDuration" class="absolute top-4 start-4 px-3.5 py-1.5 rounded-xl bg-obsidian/85 backdrop-blur-md text-amberGold border border-amberGold/30 font-bold text-xs"></span>
+        <span id="modalPrice" class="absolute bottom-3 start-5 px-4 py-1.5 rounded-xl bg-amberGold text-zinc-950 font-extrabold text-sm shadow-lg"></span>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 sm:p-7">
+        <h3 id="modalTitle" class="text-xl sm:text-2xl font-extrabold text-white mb-2"></h3>
+        <p id="modalDesc" class="text-zinc-300 text-sm leading-relaxed mb-4"></p>
+        
+        <!-- Concise Bullet Points -->
+        <ul id="modalBullets" class="space-y-2 text-xs sm:text-sm text-zinc-300 mb-6 bg-obsidian/70 p-4 rounded-2xl border border-white/10">
+        </ul>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row items-center gap-3">
+          <a id="modalWhatsappBtn" href="#" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 px-6 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-zinc-950 font-extrabold text-sm transition-all flex items-center justify-center gap-2.5">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm.029 18.88c-1.161 0-2.305-.292-3.318-.844l-3.677.964.984-3.595c-.607-1.052-.927-2.246-.926-3.468.001-3.825 3.113-6.937 6.937-6.937 1.856.001 3.598.723 4.907 2.034 1.31 1.311 2.031 3.054 2.03 4.908-.001 3.825-3.113 6.938-6.937 6.938z"/>
+            </svg>
+            <span data-i18n="btn_whatsapp">احجز عبر واتساب</span>
+          </a>
+
+          <button onclick="closeModal()" class="w-full sm:w-auto py-3.5 px-5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-sm font-semibold transition-colors" data-i18n="btn_close">
+            إغلاق
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT ==================== -->
+  <script>
+    // ضع رقم واتساب الشركة هنا بالصيغة الدولية بدون + (مثال: 2010xxxxxxxx)
+    const WHATSAPP_NUMBER = '201000000000';
+
+    // بيانات الورش (عدّل الصور والأسعار والتفاصيل من هنا بسهولة)
+    const workshopsData = [
+      {
+        id: 'acting',
+        image: 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?auto=format&fit=crop&w=900&q=80',
+        fallback: 'https://placehold.co/800x450/121216/d4af37?text=ACTING+WORKSHOP',
+        duration: { ar: '8 محاضرات', en: '8 Sessions' },
+        price: { ar: '2,500 ج.م', en: '2,500 EGP' },
+        title: {
+          ar: 'ورشة التمثيل أمام الكاميرا',
+          en: 'Acting for Camera Workshop'
+        },
+        summary: {
+          ar: 'تدريب عملي على الأداء التمثيلي الطبيعي والتعامل مع الكاميرا.',
+          en: 'Practical training on natural screen acting and camera presence.'
+        },
+        details: {
+          ar: 'ورشة عملية تركز على كسر رهبة الكاميرا وبناء الشخصية وتصوير مشهد تخرج بإضاءة سينمائية.',
+          en: 'A practical workshop focusing on camera presence, character building, and filming a graduation scene.'
+        },
+        bullets: {
+          ar: [
+            'تحليل النص وبناء أبعاد الشخصية',
+            'التحكم في لغة الجسد ونبرة الصوت أمام العدسة',
+            'تصوير مشهد تخرج احترافي لكل متدرب'
+          ],
+          en: [
+            'Script breakdown & character development',
+            'Body language & vocal control for the lens',
+            'Professionally filmed graduation scene'
+          ]
+        }
+      },
+      {
+        id: 'filmmaking',
+        image: 'https://images.unsplash.com/photo-1585670210693-e7fdd16b142e?auto=format&fit=crop&w=900&q=80',
+        fallback: 'https://placehold.co/800x450/121216/d4af37?text=FILMMAKING+WORKSHOP',
+        duration: { ar: '10 محاضرات', en: '10 Sessions' },
+        price: { ar: '3,200 ج.م', en: '3,200 EGP' },
+        title: {
+          ar: 'ورشة صناعة الفيلم القصير',
+          en: 'Short Filmmaking Workshop'
+        },
+        summary: {
+          ar: 'تعلم خطوات صناعة الفيلم من الفكرة والسيناريو وحتى التصوير.',
+          en: 'Learn filmmaking steps from story concept and script to shooting.'
+        },
+        details: {
+          ar: 'رحلة تطبيقية متكاملة لتنفيذ فيلم قصير؛ من تطوير الفكرة وتقسيم اللقطات وحتى التصوير الفعلي.',
+          en: 'A hands-on journey to execute a short film—from story development and shot listing to on-set shooting.'
+        },
+        bullets: {
+          ar: [
+            'كتابة السيناريو وتقسيم اللقطات (Shot List)',
+            'أساسيات الإخراج وإدارة الممثلين في اللوكيشن',
+            'تنفيذ مشروع فيلم قصير جماعي بنهاية الورشة'
+          ],
+          en: [
+            'Screenwriting & shot listing essentials',
+            'Directing fundamentals & working with actors',
+            'Producing a group short film project'
+          ]
+        }
+      },
+      {
+        id: 'editing',
+        image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=900&q=80',
+        fallback: 'https://placehold.co/800x450/121216/d4af37?text=EDITING+%26+COLOR',
+        duration: { ar: '6 محاضرات', en: '6 Sessions' },
+        price: { ar: '2,000 ج.م', en: '2,000 EGP' },
+        title: {
+          ar: 'كورس المونتاج وتصحيح الألوان',
+          en: 'Editing & Color Grading Course'
+        },
+        summary: {
+          ar: 'إتقان السرد بالمونتاج وتدريج الألوان السينمائي على مشاهد حقيقية.',
+          en: 'Master narrative editing and cinematic color grading on real footage.'
+        },
+        details: {
+          ar: 'تدريب عملي على بناء إيقاع المشهد، هندسة الصوت الأساسية، وتصحيح الألوان السينمائي.',
+          en: 'Hands-on training on scene pacing, basic sound design, and cinematic color grading.'
+        },
+        bullets: {
+          ar: [
+            'بناء الإيقاع الدرامي والقطع السلس بين اللقطات',
+            'أساسيات تصحيح وتدريج الألوان (Color Grading)',
+            'تطبيق عملي على لقطات خام (RAW) من إنتاج MAFAP'
+          ],
+          en: [
+            'Dramatic pacing & seamless cutting techniques',
+            'Color correction & cinematic grading fundamentals',
+            'Hands-on practice with raw MAFAP footage'
+          ]
+        }
+      }
+    ];
+
+    const translations = {
+      ar: {
+        nav_back: 'الموقع الرئيسي',
+        page_title: 'ورش وكورسات MAFAP',
+        page_subtitle: 'برامج تدريبية عملية في صناعة السينما والتمثيل بإشراف شركة مصطفى ابوطه للإنتاج الفني.',
+        card_btn: 'التفاصيل والحجز',
+        btn_whatsapp: 'احجز عبر واتساب',
+        btn_close: 'إغلاق',
+        footer_tagline: 'شركة مصطفى ابوطه للإنتاج الفني',
+        footer_copy: '© 2026 MAFAP — Mostafa Abotaha for Artistic Production. جميع الحقوق محفوظة.'
+      },
+      en: {
+        nav_back: 'Main Website',
+        page_title: 'MAFAP Workshops & Courses',
+        page_subtitle: 'Practical cinema and acting workshops supervised by Mostafa Abotaha for Artistic Production.',
+        card_btn: 'Details & Booking',
+        btn_whatsapp: 'Book via WhatsApp',
+        btn_close: 'Close',
+        footer_tagline: 'Mostafa Abotaha for Artistic Production',
+        footer_copy: '© 2026 MAFAP — Mostafa Abotaha for Artistic Production. All rights reserved.'
+      }
+    };
+
+    let currentLang = 'ar';
+    let activeId = null;
+
+    function renderWorkshops() {
+      const grid = document.getElementById('workshopsGrid');
+      const btnText = translations[currentLang].card_btn;
+
+      grid.innerHTML = workshopsData.map(item => `
+        <article onclick="openModal('${item.id}')" class="glass-card rounded-3xl overflow-hidden flex flex-col cursor-pointer group">
+          <div class="relative aspect-video bg-obsidian overflow-hidden">
+            <img 
+              src="${item.image}" 
+              onerror="this.src='${item.fallback}'"
+              alt="${item.title[currentLang]}" 
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent"></div>
+            <span class="absolute top-3 start-4 px-3 py-1 rounded-full bg-obsidian/85 backdrop-blur-md text-amberGold border border-amberGold/30 font-bold text-xs">
+              ${item.duration[currentLang]}
+            </span>
+            <span class="absolute bottom-3 end-4 px-3.5 py-1.5 rounded-xl bg-amberGold text-zinc-950 font-extrabold text-sm shadow-lg">
+              ${item.price[currentLang]}
+            </span>
+          </div>
+
+          <div class="p-6 flex-1 flex flex-col justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-white group-hover:text-amberGold transition-colors mb-2">
+                ${item.title[currentLang]}
+              </h2>
+              <p class="text-zinc-400 text-sm leading-relaxed mb-5">
+                ${item.summary[currentLang]}
+              </p>
+            </div>
+
+            <div class="pt-3 border-t border-white/10 flex items-center justify-between text-amberGold text-sm font-bold">
+              <span>${btnText}</span>
+              <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function openModal(id) {
+      const item = workshopsData.find(w => w.id === id);
+      if (!item) return;
+
+      activeId = id;
+      const img = document.getElementById('modalImg');
+      img.src = item.image;
+      img.onerror = () => { img.src = item.fallback; };
+
+      document.getElementById('modalDuration').textContent = item.duration[currentLang];
+      document.getElementById('modalPrice').textContent = item.price[currentLang];
+      document.getElementById('modalTitle').textContent = item.title[currentLang];
+      document.getElementById('modalDesc').textContent = item.details[currentLang];
+      document.getElementById('modalBullets').innerHTML = item.bullets[currentLang]
+        .map(point => `<li class="flex items-start gap-2"><span class="text-amberGold font-bold">•</span><span>${point}</span></li>`)
+        .join('');
+
+      const msg = currentLang === 'ar'
+        ? `مرحباً MAFAP، أريد الاستفسار والحجز في: ${item.title.ar} (${item.price.ar})`
+        : `Hello MAFAP, I want to inquire and book: ${item.title.en} (${item.price.en})`;
+
+      document.getElementById('modalWhatsappBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+
+      const modal = document.getElementById('workshopModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('workshopModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      activeId = null;
+    }
+
+    document.getElementById('workshopModal').addEventListener('click', (e) => {
+      if (e.target.id === 'workshopModal') closeModal();
+    });
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      document.documentElement.setAttribute('lang', currentLang);
+      document.documentElement.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+      document.getElementById('langLabel').textContent = currentLang === 'ar' ? 'EN' : 'عربي';
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[currentLang][key]) {
+          el.textContent = translations[currentLang][key];
+        }
+      });
+
+      renderWorkshops();
+      if (activeId) openModal(activeId);
+    }
+
+    window.addEventListener('DOMContentLoaded', renderWorkshops);
+  </script>
+</body>
+</html>
