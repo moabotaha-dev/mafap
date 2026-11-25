@@ -232,25 +232,44 @@
         </div>
 
         <form id="workshopForm" onsubmit="handleSaveWorkshop(event)" class="space-y-6">
-          <!-- Image URL + Live Preview -->
+          <!-- Image URL + Display Order + Live Preview -->
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center bg-obsidian/50 p-4 sm:p-5 rounded-2xl border border-white/[0.06]">
-            <div class="lg:col-span-8 space-y-2">
-              <label class="block text-xs sm:text-sm font-bold text-zinc-300" data-i18n="lbl_image">
-                رابط صورة الورشة (Image URL) *
-              </label>
-              <input 
-                type="url" 
-                id="imageUrl" 
-                required 
-                oninput="updateImagePreview()"
-                placeholder="https://example.com/workshop-poster.jpg" 
-                dir="ltr" 
-                class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600" 
-              />
-              <p class="text-[11px] text-zinc-500" data-i18n="hint_image">
-                يمكنك وضع رابط مباشر للصورة (يفضل أبعاد 16:9).
-              </p>
+            <div class="lg:col-span-8 space-y-4">
+              <div>
+                <label class="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5" data-i18n="lbl_image">
+                  رابط صورة الورشة (Image URL) *
+                </label>
+                <input 
+                  type="url" 
+                  id="imageUrl" 
+                  required 
+                  oninput="updateImagePreview()"
+                  placeholder="https://example.com/workshop-poster.jpg" 
+                  dir="ltr" 
+                  class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600" 
+                />
+                <p class="text-[11px] text-zinc-500 mt-1" data-i18n="hint_image">
+                  يمكنك وضع رابط مباشر للصورة (يفضل أبعاد 16:9).
+                </p>
+              </div>
+
+              <!-- Display Order Field -->
+              <div class="max-w-xs">
+                <label class="block text-xs sm:text-sm font-bold text-amberGold mb-1.5" data-i18n="lbl_order">
+                  رقم الترتيب في العرض (1 = يظهر في الأول)
+                </label>
+                <input 
+                  type="number" 
+                  id="displayOrder" 
+                  min="1" 
+                  value="1" 
+                  required 
+                  dir="ltr" 
+                  class="form-input w-full px-4 py-2.5 rounded-xl text-sm font-bold text-amberGold" 
+                />
+              </div>
             </div>
+
             <div class="lg:col-span-4">
               <div class="relative aspect-video rounded-xl overflow-hidden bg-surface border border-white/10">
                 <img 
@@ -348,7 +367,7 @@
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-xl sm:text-2xl font-extrabold text-white" data-i18n="list_title">الورش والكورسات الحالية</h2>
-            <p class="text-xs sm:text-sm text-zinc-400 mt-0.5" data-i18n="list_sub">يمكنك تعديل بيانات أي ورشة أو حذفها من الموقع فوراً.</p>
+            <p class="text-xs sm:text-sm text-zinc-400 mt-0.5" data-i18n="list_sub">استخدم الأسهم لتغيير ترتيب ظهور الورش أو عدّل بيانات أي ورشة فوراً.</p>
           </div>
           <span id="workshopsCountBadge" class="px-3.5 py-1.5 rounded-xl bg-surface border border-white/10 text-amberGold font-bold text-xs">
             0
@@ -375,7 +394,7 @@
     </main>
   </div>
 
-  <!-- ==================== DELETE CONFIRMATION MODAL (NO NATIVE CONFIRM) ==================== -->
+  <!-- ==================== DELETE CONFIRMATION MODAL ==================== -->
   <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md">
     <div class="w-full max-w-md glass-card rounded-3xl p-6 sm:p-7 border border-white/15 shadow-2xl">
       <div class="w-12 h-12 rounded-2xl bg-red-500/15 border border-red-500/30 text-red-400 flex items-center justify-center mb-4">
@@ -403,22 +422,18 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // =========================================================================
-    // ضع نفس إعدادات مشروع Firebase المستخدمة في صفحة workshops_courses.html هنا
-    // PASTE THE EXACT SAME FIREBASE CONFIG OBJECT USED IN workshops_courses.html BELOW
-    // =========================================================================
     // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyA-zmGGEz2AkQv7Xr-raTzGIITAM6SjG0U",
-  authDomain: "mafap-workshop.firebaseapp.com",
-  projectId: "mafap-workshop",
-  storageBucket: "mafap-workshop.firebasestorage.app",
-  messagingSenderId: "966994933147",
-  appId: "1:966994933147:web:fab25cee19c808b4539d3e",
-  measurementId: "G-7TE4S52X32"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyA-zmGGEz2AkQv7Xr-raTzGIITAM6SjG0U",
+      authDomain: "mafap-workshop.firebaseapp.com",
+      projectId: "mafap-workshop",
+      storageBucket: "mafap-workshop.firebasestorage.app",
+      messagingSenderId: "966994933147",
+      appId: "1:966994933147:web:fab25cee19c808b4539d3e",
+      measurementId: "G-7TE4S52X32"
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -428,6 +443,7 @@ const firebaseConfig = {
     let workshopsList = [];
     let editingId = null;
     let pendingDeleteId = null;
+    let isReordering = false;
 
     const translations = {
       ar: {
@@ -446,6 +462,7 @@ const firebaseConfig = {
         edit_badge: 'وضع التعديل نشط',
         lbl_image: 'رابط صورة الورشة (Image URL) *',
         hint_image: 'يمكنك وضع رابط مباشر للصورة (يفضل أبعاد 16:9).',
+        lbl_order: 'رقم الترتيب في العرض (1 = يظهر في الأول)',
         lbl_preview: 'معاينة الصورة',
         lbl_title_ar: 'اسم الورشة (عربي) *',
         lbl_title_en: 'Workshop Title (English) *',
@@ -461,17 +478,20 @@ const firebaseConfig = {
         btn_update: 'حفظ التعديلات',
         btn_cancel: 'إلغاء التعديل',
         list_title: 'الورش والكورسات الحالية',
-        list_sub: 'يمكنك تعديل بيانات أي ورشة أو حذفها من الموقع فوراً.',
+        list_sub: 'استخدم الأسهم لتغيير ترتيب ظهور الورش أو عدّل بيانات أي ورشة فوراً.',
         list_empty_t: 'لا توجد ورش مضافة حتى الآن',
         list_empty_s: 'استخدم النموذج بالأعلى لإضافة أول ورشة أو كورس.',
-        btn_edit: 'تعديل (Edit)',
-        btn_delete: 'حذف (Delete)',
+        btn_edit: 'تعديل',
+        btn_delete: 'حذف',
+        move_earlier: 'تقديم للأول',
+        move_later: 'تأخير للخلف',
         del_modal_title: 'تأكيد حذف الورشة',
         del_modal_desc: 'هل أنت متأكد من حذف:',
         btn_confirm_del: 'نعم، احذف',
         btn_cancel_del: 'تراجع',
         toast_saved: 'تمت إضافة الورشة بنجاح!',
         toast_updated: 'تم تحديث بيانات الورشة بنجاح!',
+        toast_reordered: 'تم تحديث ترتيب الورش بنجاح!',
         toast_deleted: 'تم حذف الورشة بنجاح.',
         toast_err: 'حدث خطأ أثناء تنفيذ العملية. تأكد من صلاحيات Firebase.',
         auth_err: 'بيانات الدخول غير صحيحة أو الحساب غير مفعل.'
@@ -492,6 +512,7 @@ const firebaseConfig = {
         edit_badge: 'Edit Mode Active',
         lbl_image: 'Workshop Image URL *',
         hint_image: 'Paste a direct image link (16:9 aspect ratio recommended).',
+        lbl_order: 'Display Order (1 = First)',
         lbl_preview: 'Image Preview',
         lbl_title_ar: 'Workshop Title (Arabic) *',
         lbl_title_en: 'Workshop Title (English) *',
@@ -507,17 +528,20 @@ const firebaseConfig = {
         btn_update: 'Save Changes',
         btn_cancel: 'Cancel Edit',
         list_title: 'Existing Workshops & Courses',
-        list_sub: 'Edit or delete any workshop from the live page immediately.',
+        list_sub: 'Use the arrows to reorder workshops or edit any item immediately.',
         list_empty_t: 'No workshops added yet',
         list_empty_s: 'Use the form above to add your first workshop or course.',
         btn_edit: 'Edit',
         btn_delete: 'Delete',
+        move_earlier: 'Move Earlier',
+        move_later: 'Move Later',
         del_modal_title: 'Confirm Deletion',
         del_modal_desc: 'Are you sure you want to delete:',
         btn_confirm_del: 'Yes, Delete',
         btn_cancel_del: 'Cancel',
         toast_saved: 'Workshop added successfully!',
         toast_updated: 'Workshop updated successfully!',
+        toast_reordered: 'Display order updated!',
         toast_deleted: 'Workshop deleted successfully.',
         toast_err: 'Operation failed. Check your Firebase permissions.',
         auth_err: 'Invalid email or password.'
@@ -544,7 +568,7 @@ const firebaseConfig = {
       banner.classList.remove('hidden');
       setTimeout(() => {
         banner.classList.add('hidden');
-      }, 4000);
+      }, 3500);
     }
 
     // Monitor Auth State
@@ -606,7 +630,7 @@ const firebaseConfig = {
       preview.src = url || fallback;
     };
 
-    // Fetch All Workshops from Firestore
+    // Fetch All Workshops & Sort by Order (with safe fallback for older docs)
     async function fetchWorkshops() {
       const listLoading = document.getElementById('listLoading');
       const listEmpty = document.getElementById('listEmpty');
@@ -617,9 +641,22 @@ const firebaseConfig = {
       grid.innerHTML = '';
 
       try {
-        const q = query(collection(db, 'workshops'), orderBy('createdAt', 'desc'));
-        const snapshot = await getDocs(q);
-        workshopsList = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        const snapshot = await getDocs(collection(db, 'workshops'));
+        const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        items.sort((a, b) => {
+          const orderA = typeof a.order === 'number' ? a.order : 9999;
+          const orderB = typeof b.order === 'number' ? b.order : 9999;
+          if (orderA !== orderB) return orderA - orderB;
+          const timeA = a.createdAt?.seconds || 0;
+          const timeB = b.createdAt?.seconds || 0;
+          return timeB - timeA;
+        });
+
+        workshopsList = items;
+        if (!editingId) {
+          document.getElementById('displayOrder').value = workshopsList.length + 1;
+        }
         renderWorkshopsGrid();
       } catch (err) {
         console.error('Error fetching workshops:', err);
@@ -628,6 +665,38 @@ const firebaseConfig = {
         listLoading.classList.add('hidden');
       }
     }
+
+    // Move Workshop Earlier (-1) or Later (+1) in Order
+    window.moveWorkshop = async function(index, direction) {
+      if (isReordering) return;
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= workshopsList.length) return;
+
+      isReordering = true;
+      try {
+        // Swap items in local array
+        const temp = workshopsList[index];
+        workshopsList[index] = workshopsList[targetIndex];
+        workshopsList[targetIndex] = temp;
+
+        // Re-assign clean sequential order (1, 2, 3...) and save to Firestore
+        const updates = workshopsList.map((item, idx) => {
+          const newOrder = idx + 1;
+          item.order = newOrder;
+          return updateDoc(doc(db, 'workshops', item.id), { order: newOrder });
+        });
+
+        renderWorkshopsGrid();
+        await Promise.all(updates);
+        showToast(translations[currentLang].toast_reordered);
+      } catch (err) {
+        console.error('Reorder error:', err);
+        showToast(translations[currentLang].toast_err, true);
+        await fetchWorkshops();
+      } finally {
+        isReordering = false;
+      }
+    };
 
     // Render Workshops List
     function renderWorkshopsGrid() {
@@ -647,11 +716,15 @@ const firebaseConfig = {
       listEmpty.classList.add('hidden');
       const fallback = 'https://placehold.co/800x450/121216/d4af37?text=MAFAP+WORKSHOP';
 
-      grid.innerHTML = workshopsList.map(item => {
+      grid.innerHTML = workshopsList.map((item, idx) => {
         const titleAr = item.title?.ar || '';
         const titleEn = item.title?.en || '';
         const priceDisplay = item.price?.[currentLang] || item.price?.ar || item.price?.en || '';
         const durationDisplay = item.duration?.[currentLang] || item.duration?.ar || item.duration?.en || '';
+        const orderNum = typeof item.order === 'number' ? item.order : idx + 1;
+
+        const isFirst = idx === 0;
+        const isLast = idx === workshopsList.length - 1;
 
         return `
           <div class="glass-card rounded-3xl overflow-hidden flex flex-col justify-between">
@@ -664,10 +737,18 @@ const firebaseConfig = {
                   class="w-full h-full object-cover"
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent"></div>
-                ${durationDisplay ? `
-                  <span class="absolute top-3 start-3 px-3 py-1 rounded-full bg-obsidian/85 backdrop-blur-md text-amberGold border border-amberGold/30 font-bold text-xs">
-                    ${durationDisplay}
-                  </span>` : ''}
+                
+                <!-- Order Badge + Duration -->
+                <div class="absolute top-3 start-3 flex items-center gap-1.5">
+                  <span class="px-2.5 py-1 rounded-full bg-amberGold text-zinc-950 font-extrabold text-xs shadow">
+                    #${orderNum}
+                  </span>
+                  ${durationDisplay ? `
+                    <span class="px-3 py-1 rounded-full bg-obsidian/85 backdrop-blur-md text-amberGold border border-amberGold/30 font-bold text-xs">
+                      ${durationDisplay}
+                    </span>` : ''}
+                </div>
+
                 ${priceDisplay ? `
                   <span class="absolute bottom-3 end-3 px-3 py-1 rounded-xl bg-amberGold text-zinc-950 font-extrabold text-xs shadow-lg">
                     ${priceDisplay}
@@ -680,13 +761,38 @@ const firebaseConfig = {
               </div>
             </div>
 
-            <div class="px-5 pb-5 pt-3 border-t border-white/10 flex items-center gap-2.5">
-              <button onclick="startEditWorkshop('${item.id}')" class="flex-1 py-2.5 px-3 rounded-xl bg-amberGold/15 hover:bg-amberGold/25 text-amberGold border border-amberGold/30 font-bold text-xs transition-all">
-                ${dict.btn_edit}
-              </button>
-              <button onclick="promptDeleteWorkshop('${item.id}')" class="flex-1 py-2.5 px-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 font-bold text-xs transition-all">
-                ${dict.btn_delete}
-              </button>
+            <div class="px-5 pb-5 pt-3 border-t border-white/10 space-y-2.5">
+              <!-- Reorder Controls -->
+              <div class="flex items-center gap-2">
+                <button 
+                  onclick="moveWorkshop(${idx}, -1)" 
+                  ${isFirst ? 'disabled' : ''}
+                  title="${dict.move_earlier}"
+                  class="flex-1 py-2 px-2.5 rounded-xl bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none text-zinc-200 border border-white/10 font-bold text-xs transition-all flex items-center justify-center gap-1"
+                >
+                  <span>${currentLang === 'ar' ? '→' : '←'}</span>
+                  <span>${dict.move_earlier}</span>
+                </button>
+                <button 
+                  onclick="moveWorkshop(${idx}, 1)" 
+                  ${isLast ? 'disabled' : ''}
+                  title="${dict.move_later}"
+                  class="flex-1 py-2 px-2.5 rounded-xl bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none text-zinc-200 border border-white/10 font-bold text-xs transition-all flex items-center justify-center gap-1"
+                >
+                  <span>${dict.move_later}</span>
+                  <span>${currentLang === 'ar' ? '←' : '→'}</span>
+                </button>
+              </div>
+
+              <!-- Edit / Delete Controls -->
+              <div class="flex items-center gap-2">
+                <button onclick="startEditWorkshop('${item.id}')" class="flex-1 py-2.5 px-3 rounded-xl bg-amberGold/15 hover:bg-amberGold/25 text-amberGold border border-amberGold/30 font-bold text-xs transition-all">
+                  ${dict.btn_edit}
+                </button>
+                <button onclick="promptDeleteWorkshop('${item.id}')" class="flex-1 py-2.5 px-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 font-bold text-xs transition-all">
+                  ${dict.btn_delete}
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -699,7 +805,10 @@ const firebaseConfig = {
       const saveBtn = document.getElementById('saveWorkshopBtn');
       saveBtn.disabled = true;
 
+      const orderVal = parseInt(document.getElementById('displayOrder').value, 10);
+
       const payload = {
+        order: isNaN(orderVal) ? workshopsList.length + 1 : orderVal,
         image: document.getElementById('imageUrl').value.trim(),
         title: {
           ar: document.getElementById('titleAr').value.trim(),
@@ -744,10 +853,12 @@ const firebaseConfig = {
 
     // Populate Form for Editing
     window.startEditWorkshop = function(id) {
-      const item = workshopsList.find(w => w.id === id);
-      if (!item) return;
+      const idx = workshopsList.findIndex(w => w.id === id);
+      if (idx === -1) return;
+      const item = workshopsList[idx];
 
       editingId = id;
+      document.getElementById('displayOrder').value = typeof item.order === 'number' ? item.order : idx + 1;
       document.getElementById('imageUrl').value = item.image || '';
       updateImagePreview();
 
@@ -774,6 +885,7 @@ const firebaseConfig = {
     window.resetForm = function() {
       editingId = null;
       document.getElementById('workshopForm').reset();
+      document.getElementById('displayOrder').value = workshopsList.length + 1;
       updateImagePreview();
 
       document.getElementById('formHeading').textContent = translations[currentLang].form_title_add;
@@ -839,7 +951,6 @@ const firebaseConfig = {
         }
       });
 
-      // Keep form heading & save button aligned with current edit state
       document.getElementById('formHeading').textContent = editingId ? dict.form_title_edit : dict.form_title_add;
       document.getElementById('saveBtnText').textContent = editingId ? dict.btn_update : dict.btn_save;
 
