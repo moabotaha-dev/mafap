@@ -307,12 +307,18 @@ const firebaseConfig = {
       }
     }
 
-    // الاستماع المباشر لمجموعة الورش 'workshops' في Firestore
+    // الاستماع المباشر لمجموعة الورش 'workshops' في Firestore وترتيبها حسب رقم العرض
     function initWorkshopsListener() {
-      const q = query(collection(db, 'workshops'), orderBy('createdAt', 'desc'));
-      onSnapshot(q, (snapshot) => {
+      onSnapshot(collection(db, 'workshops'), (snapshot) => {
         document.getElementById('loadingState').classList.add('hidden');
-        workshopsData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        workshopsData = snapshot.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => {
+            const orderA = typeof a.order === 'number' ? a.order : 9999;
+            const orderB = typeof b.order === 'number' ? b.order : 9999;
+            if (orderA !== orderB) return orderA - orderB;
+            return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
+          });
         renderWorkshops();
       }, (error) => {
         console.error('Firestore Error:', error);
