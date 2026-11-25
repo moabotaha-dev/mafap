@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MAFAP | لوحة إدارة الورش والكورسات</title>
+  <link rel="icon" type="image/png" href="MAFAP White bg.png" />
+  <link rel="apple-touch-icon" href="MAFAP White bg.png" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#0a0a0c',
+            surface: '#121216',
+            surfaceLight: '#18181f',
+            amberGold: '#d4af37',
+            amberWarm: '#e5c158',
+          },
+          fontFamily: {
+            arabic: ['Cairo', 'sans-serif'],
+            english: ['Plus Jakarta Sans', 'sans-serif'],
+            display: ['Space Grotesk', 'Cairo', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0a0a0c;
+      color: #f4f4f5;
+      overflow-x: hidden;
+    }
+    html[dir="rtl"] body { font-family: 'Cairo', sans-serif; }
+    html[dir="ltr"] body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Subtle Film Grain Overlay */
+    .film-grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 40;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    .glass-nav {
+      background: rgba(10, 10, 12, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card {
+      background: linear-gradient(145deg, rgba(24, 24, 31, 0.78), rgba(18, 18, 22, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .form-input {
+      background-color: rgba(10, 10, 12, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #f4f4f5;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #d4af37;
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-amberGold selection:text-black">
+
+  <div class="film-grain" aria-hidden="true"></div>
+
+  <!-- Toast Notification Banner -->
+  <div id="toastBanner" class="fixed bottom-6 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 z-50 hidden items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border backdrop-blur-md text-sm font-bold transition-all">
+    <span id="toastIcon"></span>
+    <span id="toastMessage"></span>
+  </div>
+
+  <!-- Initial Auth Checking Spinner -->
+  <div id="authCheckingView" class="flex-1 flex flex-col items-center justify-center p-6">
+    <div class="w-11 h-11 border-4 border-amberGold/25 border-t-amberGold rounded-full animate-spin mb-4"></div>
+    <p class="text-zinc-400 text-sm" data-i18n="checking_auth">جاري التحقق من الجلسة...</p>
+  </div>
+
+  <!-- ==================== 1. LOGIN VIEW (LOGGED OUT) ==================== -->
+  <div id="loginView" class="hidden flex-1 flex-col items-center justify-center p-4 sm:p-6 relative">
+    <!-- Top Language Toggle -->
+    <div class="absolute top-6 end-6">
+      <button onclick="toggleLanguage()" class="px-4 py-2 rounded-xl text-xs font-bold uppercase bg-surface hover:bg-zinc-800 text-zinc-200 border border-white/10 hover:border-amberGold/50 transition-all">
+        <span class="lang-label">EN</span>
+      </button>
+    </div>
+
+    <div class="w-full max-w-md glass-card rounded-3xl p-7 sm:p-9 shadow-2xl">
+      <!-- Brand Logo -->
+      <div class="flex flex-col items-center text-center mb-7">
+        <div class="w-14 h-14 rounded-2xl bg-obsidian border border-amberGold/30 flex items-center justify-center mb-4 shadow-lg shadow-amberGold/10">
+          <svg class="w-7 h-7 text-amberGold" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="14.31" y1="8" x2="20.05" y2="17.94"/>
+            <line x1="9.69" y1="8" x2="21.17" y2="8"/>
+            <line x1="7.38" y1="12" x2="13.12" y2="2.06"/>
+            <line x1="9.69" y1="16" x2="3.95" y2="6.06"/>
+            <line x1="14.31" y1="16" x2="2.83" y2="16"/>
+            <line x1="16.62" y1="12" x2="10.88" y2="21.94"/>
+          </svg>
+        </div>
+        <span class="font-display font-bold text-2xl tracking-wider text-white">MAFAP ADMIN</span>
+        <p class="text-zinc-400 text-xs sm:text-sm mt-1" data-i18n="login_subtitle">
+          تسجيل الدخول لإدارة الورش والكورسات
+        </p>
+      </div>
+
+      <!-- Auth Error Alert Box -->
+      <div id="loginErrorBox" class="hidden mb-5 p-3.5 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs sm:text-sm flex items-center gap-2.5">
+        <svg class="w-5 h-5 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span id="loginErrorText"></span>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-zinc-300 mb-1.5" data-i18n="login_email">البريد الإلكتروني</label>
+          <input type="email" id="loginEmail" required placeholder="admin@mafap.com" dir="ltr" class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600" />
+        </div>
+
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-zinc-300 mb-1.5" data-i18n="login_pass">كلمة المرور</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••" dir="ltr" class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600" />
+        </div>
+
+        <button type="submit" id="loginSubmitBtn" class="w-full py-3.5 mt-2 rounded-xl bg-amberGold hover:bg-amberWarm text-zinc-950 font-extrabold text-sm transition-all shadow-lg shadow-amberGold/20 disabled:opacity-60">
+          <span id="loginBtnText" data-i18n="login_btn">دخول لوحة التحكم</span>
+        </button>
+      </form>
+
+      <div class="mt-6 pt-5 border-t border-white/10 flex items-center justify-between text-xs text-zinc-400">
+        <a href="workshops.html" class="hover:text-amberGold transition-colors" data-i18n="link_workshops">صفحة الورش</a>
+        <a href="index.html" class="hover:text-amberGold transition-colors" data-i18n="link_home">الموقع الرئيسي</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 2. ADMIN DASHBOARD VIEW (LOGGED IN) ==================== -->
+  <div id="dashboardView" class="hidden flex-1 flex-col">
+    
+    <!-- Sticky Glass Header -->
+    <header class="sticky top-0 z-50 glass-nav">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-3">
+        
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-surface border border-amberGold/40 flex items-center justify-center">
+            <svg class="w-5 h-5 text-amberGold" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="14.31" y1="8" x2="20.05" y2="17.94"/>
+              <line x1="9.69" y1="8" x2="21.17" y2="8"/>
+              <line x1="7.38" y1="12" x2="13.12" y2="2.06"/>
+              <line x1="9.69" y1="16" x2="3.95" y2="6.06"/>
+              <line x1="14.31" y1="16" x2="2.83" y2="16"/>
+              <line x1="16.62" y1="12" x2="10.88" y2="21.94"/>
+            </svg>
+          </div>
+          <div>
+            <span class="font-display font-bold text-xl sm:text-2xl tracking-wider text-white block leading-none">MAFAP</span>
+            <span class="text-[11px] text-amberGold font-semibold" data-i18n="admin_badge">لوحة الإدارة</span>
+          </div>
+        </div>
+
+        <!-- Navigation Links & Actions -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <a href="workshops.html" class="hidden sm:inline-flex px-3.5 py-2 rounded-xl text-xs font-bold bg-surface hover:bg-zinc-800 text-zinc-200 border border-white/10 hover:border-amberGold/50 transition-all" data-i18n="link_workshops">
+            صفحة الورش
+          </a>
+          <a href="index.html" class="hidden md:inline-flex px-3.5 py-2 rounded-xl text-xs font-bold bg-surface hover:bg-zinc-800 text-zinc-200 border border-white/10 hover:border-amberGold/50 transition-all" data-i18n="link_home">
+            الموقع الرئيسي
+          </a>
+
+          <button onclick="toggleLanguage()" class="px-3.5 py-2 rounded-xl text-xs font-bold uppercase bg-surface hover:bg-zinc-800 text-zinc-200 border border-white/10 hover:border-amberGold/50 transition-all">
+            <span class="lang-label">EN</span>
+          </button>
+
+          <button onclick="handleLogout()" class="px-3.5 sm:px-4 py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 font-bold text-xs transition-all flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+            <span data-i18n="btn_logout">خروج</span>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Main Dashboard Content -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-12">
+
+      <!-- Mobile Quick Links -->
+      <div class="flex sm:hidden items-center gap-2">
+        <a href="workshops.html" class="flex-1 text-center py-2.5 rounded-xl text-xs font-bold bg-surface border border-white/10 text-zinc-200" data-i18n="link_workshops">صفحة الورش</a>
+        <a href="index.html" class="flex-1 text-center py-2.5 rounded-xl text-xs font-bold bg-surface border border-white/10 text-zinc-200" data-i18n="link_home">الموقع الرئيسي</a>
+      </div>
+
+      <!-- ==================== SECTION A: ADD / EDIT WORKSHOP FORM ==================== -->
+      <section id="formSection" class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-6 border-b border-white/10">
+          <div>
+            <h1 id="formHeading" class="text-xl sm:text-2xl font-extrabold text-white" data-i18n="form_title_add">
+              إضافة ورشة أو كورس جديد
+            </h1>
+            <p class="text-xs sm:text-sm text-zinc-400 mt-1" data-i18n="form_sub">
+              أدخل بيانات الورشة بالعربية والإنجليزية لتظهر مباشرة في صفحة الورش.
+            </p>
+          </div>
+          <span id="editModeBadge" class="hidden px-3.5 py-1.5 rounded-full text-xs font-bold bg-amberGold/15 text-amberGold border border-amberGold/30" data-i18n="edit_badge">
+            وضع التعديل نشط
+          </span>
+        </div>
+
+        <form id="workshopForm" onsubmit="handleSaveWorkshop(event)" class="space-y-6">
+          <!-- Image URL + Live Preview -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center bg-obsidian/50 p-4 sm:p-5 rounded-2xl border border-white/[0.06]">
+            <div class="lg:col-span-8 space-y-2">
+              <label class="block text-xs sm:text-sm font-bold text-zinc-300" data-i18n="lbl_image">
+                رابط صورة الورشة (Image URL) *
+              </label>
+              <input 
+                type="url" 
+                id="imageUrl" 
+                required 
+                oninput="updateImagePreview()"
+                placeholder="https://example.com/workshop-poster.jpg" 
+                dir="ltr" 
+                class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600" 
+              />
+              <p class="text-[11px] text-zinc-500" data-i18n="hint_image">
+                يمكنك وضع رابط مباشر للصورة (يفضل أبعاد 16:9).
+              </p>
+            </div>
+            <div class="lg:col-span-4">
+              <div class="relative aspect-video rounded-xl overflow-hidden bg-surface border border-white/10">
+                <img 
+                  id="imagePreview" 
+                  src="https://placehold.co/800x450/121216/d4af37?text=MAFAP+PREVIEW" 
+                  onerror="this.src='https://placehold.co/800x450/121216/d4af37?text=MAFAP+PREVIEW'"
+                  alt="Preview" 
+                  class="w-full h-full object-cover"
+                />
+                <span class="absolute bottom-2 end-2 px-2.5 py-0.5 rounded-md bg-black/75 text-[10px] text-zinc-300 font-semibold" data-i18n="lbl_preview">
+                  معاينة الصورة
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Titles (AR / EN) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5" data-i18n="lbl_title_ar">اسم الورشة (عربي) *</label>
+              <input type="text" id="titleAr" required placeholder="مثال: ورشة الإخراج السينمائي" class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600" />
+            </div>
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5" data-i18n="lbl_title_en">Workshop Title (English) *</label>
+              <input type="text" id="titleEn" required placeholder="e.g. Film Directing Workshop" dir="ltr" class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600" />
+            </div>
+          </div>
+
+          <!-- Prices (AR / EN) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5" data-i18n="lbl_price_ar">السعر (عربي) *</label>
+              <input type="text" id="priceAr" required placeholder="مثال: 2,500 ج.م" class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600" />
+            </div>
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5" data-i18n="lbl_price_en">Price (English) *</label>
+              <input type="text" id="priceEn" required placeholder="e.g. 2,500 EGP" dir="ltr" class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600" />
+            </div>
+          </div>
+
+          <!-- Durations (AR / EN) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5" data-i18n="lbl_dur_ar">المدة / عدد المحاضرات (عربي) *</label>
+              <input type="text" id="durationAr" required placeholder="مثال: 8 محاضرات" class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600" />
+            </div>
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5" data-i18n="lbl_dur_en">Duration / Sessions (English) *</label>
+              <input type="text" id="durationEn" required placeholder="e.g. 8 Lectures" dir="ltr" class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600" />
+            </div>
+          </div>
+
+          <!-- Short Descriptions (AR / EN) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5" data-i18n="lbl_short_ar">وصف مختصر للكارت (عربي) *</label>
+              <input type="text" id="shortAr" required placeholder="سطر تعريفي يظهر على كارت الورشة..." class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600" />
+            </div>
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5" data-i18n="lbl_short_en">Short Description for Card (English) *</label>
+              <input type="text" id="shortEn" required placeholder="One-line summary shown on the card..." dir="ltr" class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600" />
+            </div>
+          </div>
+
+          <!-- Full Details (AR / EN) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5" data-i18n="lbl_details_ar">التفاصيل الكاملة (عربي) *</label>
+              <textarea id="detailsAr" rows="4" required placeholder="اكتب محاور الورشة وتفاصيلها الكاملة..." class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5" data-i18n="lbl_details_en">Full Details (English) *</label>
+              <textarea id="detailsEn" rows="4" required placeholder="Write full workshop syllabus and details..." dir="ltr" class="form-input w-full px-4 py-3 rounded-xl text-sm placeholder-zinc-600"></textarea>
+            </div>
+          </div>
+
+          <!-- Form Buttons -->
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <button type="submit" id="saveWorkshopBtn" class="px-8 py-3.5 rounded-xl bg-amberGold hover:bg-amberWarm text-zinc-950 font-extrabold text-sm transition-all shadow-lg shadow-amberGold/20 disabled:opacity-60 flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span id="saveBtnText" data-i18n="btn_save">حفظ ونشر الورشة</span>
+            </button>
+
+            <button type="button" id="cancelEditBtn" onclick="resetForm()" class="hidden px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10 font-bold text-sm transition-all" data-i18n="btn_cancel">
+              إلغاء التعديل
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ==================== SECTION B: EXISTING WORKSHOPS LIST ==================== -->
+      <section class="space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-white" data-i18n="list_title">الورش والكورسات الحالية</h2>
+            <p class="text-xs sm:text-sm text-zinc-400 mt-0.5" data-i18n="list_sub">يمكنك تعديل بيانات أي ورشة أو حذفها من الموقع فوراً.</p>
+          </div>
+          <span id="workshopsCountBadge" class="px-3.5 py-1.5 rounded-xl bg-surface border border-white/10 text-amberGold font-bold text-xs">
+            0
+          </span>
+        </div>
+
+        <!-- Loading List -->
+        <div id="listLoading" class="flex items-center justify-center py-14">
+          <div class="w-9 h-9 border-4 border-amberGold/25 border-t-amberGold rounded-full animate-spin"></div>
+        </div>
+
+        <!-- Empty List -->
+        <div id="listEmpty" class="hidden glass-card rounded-3xl p-10 text-center">
+          <p class="text-zinc-300 font-bold text-base mb-1" data-i18n="list_empty_t">لا توجد ورش مضافة حتى الآن</p>
+          <p class="text-zinc-500 text-xs sm:text-sm" data-i18n="list_empty_s">استخدم النموذج بالأعلى لإضافة أول ورشة أو كورس.</p>
+        </div>
+
+        <!-- Workshops Grid -->
+        <div id="adminWorkshopsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Cards populated via Firestore -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==================== DELETE CONFIRMATION MODAL (NO NATIVE CONFIRM) ==================== -->
+  <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="w-full max-w-md glass-card rounded-3xl p-6 sm:p-7 border border-white/15 shadow-2xl">
+      <div class="w-12 h-12 rounded-2xl bg-red-500/15 border border-red-500/30 text-red-400 flex items-center justify-center mb-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-extrabold text-white mb-2" data-i18n="del_modal_title">تأكيد حذف الورشة</h3>
+      <p class="text-zinc-400 text-sm mb-6">
+        <span data-i18n="del_modal_desc">هل أنت متأكد من حذف:</span>
+        <strong id="deleteTargetName" class="text-white block mt-1"></strong>
+      </p>
+      <div class="flex items-center gap-3">
+        <button id="confirmDeleteBtn" onclick="executeDeleteWorkshop()" class="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-sm transition-all disabled:opacity-60" data-i18n="btn_confirm_del">
+          نعم، احذف
+        </button>
+        <button onclick="closeDeleteModal()" class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 font-bold text-sm transition-all" data-i18n="btn_cancel_del">
+          تراجع
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FIREBASE SDK & DASHBOARD LOGIC ==================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // =========================================================================
+    // ضع نفس إعدادات مشروع Firebase المستخدمة في صفحة workshops.html هنا
+    // PASTE THE EXACT SAME FIREBASE CONFIG OBJECT USED IN workshops.html BELOW
+    // =========================================================================
+    const FIREBASE_CONFIG = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(FIREBASE_CONFIG);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentLang = 'ar';
+    let workshopsList = [];
+    let editingId = null;
+    let pendingDeleteId = null;
+
+    const translations = {
+      ar: {
+        checking_auth: 'جاري التحقق من الجلسة...',
+        login_subtitle: 'تسجيل الدخول لإدارة الورش والكورسات',
+        login_email: 'البريد الإلكتروني',
+        login_pass: 'كلمة المرور',
+        login_btn: 'دخول لوحة التحكم',
+        link_workshops: 'صفحة الورش',
+        link_home: 'الموقع الرئيسي',
+        admin_badge: 'لوحة الإدارة',
+        btn_logout: 'خروج',
+        form_title_add: 'إضافة ورشة أو كورس جديد',
+        form_title_edit: 'تعديل بيانات الورشة',
+        form_sub: 'أدخل بيانات الورشة بالعربية والإنجليزية لتظهر مباشرة في صفحة الورش.',
+        edit_badge: 'وضع التعديل نشط',
+        lbl_image: 'رابط صورة الورشة (Image URL) *',
+        hint_image: 'يمكنك وضع رابط مباشر للصورة (يفضل أبعاد 16:9).',
+        lbl_preview: 'معاينة الصورة',
+        lbl_title_ar: 'اسم الورشة (عربي) *',
+        lbl_title_en: 'Workshop Title (English) *',
+        lbl_price_ar: 'السعر (عربي) *',
+        lbl_price_en: 'Price (English) *',
+        lbl_dur_ar: 'المدة / عدد المحاضرات (عربي) *',
+        lbl_dur_en: 'Duration / Sessions (English) *',
+        lbl_short_ar: 'وصف مختصر للكارت (عربي) *',
+        lbl_short_en: 'Short Description for Card (English) *',
+        lbl_details_ar: 'التفاصيل الكاملة (عربي) *',
+        lbl_details_en: 'Full Details (English) *',
+        btn_save: 'حفظ ونشر الورشة',
+        btn_update: 'حفظ التعديلات',
+        btn_cancel: 'إلغاء التعديل',
+        list_title: 'الورش والكورسات الحالية',
+        list_sub: 'يمكنك تعديل بيانات أي ورشة أو حذفها من الموقع فوراً.',
+        list_empty_t: 'لا توجد ورش مضافة حتى الآن',
+        list_empty_s: 'استخدم النموذج بالأعلى لإضافة أول ورشة أو كورس.',
+        btn_edit: 'تعديل (Edit)',
+        btn_delete: 'حذف (Delete)',
+        del_modal_title: 'تأكيد حذف الورشة',
+        del_modal_desc: 'هل أنت متأكد من حذف:',
+        btn_confirm_del: 'نعم، احذف',
+        btn_cancel_del: 'تراجع',
+        toast_saved: 'تمت إضافة الورشة بنجاح!',
+        toast_updated: 'تم تحديث بيانات الورشة بنجاح!',
+        toast_deleted: 'تم حذف الورشة بنجاح.',
+        toast_err: 'حدث خطأ أثناء تنفيذ العملية. تأكد من صلاحيات Firebase.',
+        auth_err: 'بيانات الدخول غير صحيحة أو الحساب غير مفعل.'
+      },
+      en: {
+        checking_auth: 'Checking session...',
+        login_subtitle: 'Sign in to manage MAFAP workshops & courses',
+        login_email: 'Email Address',
+        login_pass: 'Password',
+        login_btn: 'Sign In to Dashboard',
+        link_workshops: 'Workshops Page',
+        link_home: 'Main Website',
+        admin_badge: 'Admin Dashboard',
+        btn_logout: 'Logout',
+        form_title_add: 'Add New Workshop or Course',
+        form_title_edit: 'Edit Workshop Details',
+        form_sub: 'Enter workshop details in Arabic & English to publish immediately.',
+        edit_badge: 'Edit Mode Active',
+        lbl_image: 'Workshop Image URL *',
+        hint_image: 'Paste a direct image link (16:9 aspect ratio recommended).',
+        lbl_preview: 'Image Preview',
+        lbl_title_ar: 'Workshop Title (Arabic) *',
+        lbl_title_en: 'Workshop Title (English) *',
+        lbl_price_ar: 'Price (Arabic) *',
+        lbl_price_en: 'Price (English) *',
+        lbl_dur_ar: 'Duration / Sessions (Arabic) *',
+        lbl_dur_en: 'Duration / Sessions (English) *',
+        lbl_short_ar: 'Short Description for Card (Arabic) *',
+        lbl_short_en: 'Short Description for Card (English) *',
+        lbl_details_ar: 'Full Details (Arabic) *',
+        lbl_details_en: 'Full Details (English) *',
+        btn_save: 'Save & Publish Workshop',
+        btn_update: 'Save Changes',
+        btn_cancel: 'Cancel Edit',
+        list_title: 'Existing Workshops & Courses',
+        list_sub: 'Edit or delete any workshop from the live page immediately.',
+        list_empty_t: 'No workshops added yet',
+        list_empty_s: 'Use the form above to add your first workshop or course.',
+        btn_edit: 'Edit',
+        btn_delete: 'Delete',
+        del_modal_title: 'Confirm Deletion',
+        del_modal_desc: 'Are you sure you want to delete:',
+        btn_confirm_del: 'Yes, Delete',
+        btn_cancel_del: 'Cancel',
+        toast_saved: 'Workshop added successfully!',
+        toast_updated: 'Workshop updated successfully!',
+        toast_deleted: 'Workshop deleted successfully.',
+        toast_err: 'Operation failed. Check your Firebase permissions.',
+        auth_err: 'Invalid email or password.'
+      }
+    };
+
+    // Toast Helper
+    function showToast(msg, isError = false) {
+      const banner = document.getElementById('toastBanner');
+      const iconEl = document.getElementById('toastIcon');
+      const msgEl = document.getElementById('toastMessage');
+
+      banner.className = `fixed bottom-6 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border backdrop-blur-md text-sm font-bold transition-all ${
+        isError
+          ? 'bg-red-950/90 border-red-500/40 text-red-200'
+          : 'bg-zinc-900/95 border-amberGold/50 text-amberGold'
+      }`;
+
+      iconEl.innerHTML = isError
+        ? `<svg class="w-5 h-5 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`
+        : `<svg class="w-5 h-5 text-amberGold shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
+
+      msgEl.textContent = msg;
+      banner.classList.remove('hidden');
+      setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 4000);
+    }
+
+    // Monitor Auth State
+    onAuthStateChanged(auth, (user) => {
+      document.getElementById('authCheckingView').classList.add('hidden');
+      if (user) {
+        document.getElementById('loginView').classList.add('hidden');
+        document.getElementById('loginView').classList.remove('flex');
+        document.getElementById('dashboardView').classList.remove('hidden');
+        document.getElementById('dashboardView').classList.add('flex');
+        fetchWorkshops();
+      } else {
+        document.getElementById('dashboardView').classList.add('hidden');
+        document.getElementById('dashboardView').classList.remove('flex');
+        document.getElementById('loginView').classList.remove('hidden');
+        document.getElementById('loginView').classList.add('flex');
+      }
+    });
+
+    // Login Handler
+    window.handleLogin = async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('loginSubmitBtn');
+      const errorBox = document.getElementById('loginErrorBox');
+      const errorText = document.getElementById('loginErrorText');
+
+      errorBox.classList.add('hidden');
+      btn.disabled = true;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        document.getElementById('loginForm').reset();
+      } catch (err) {
+        console.error('Login error:', err);
+        errorText.textContent = translations[currentLang].auth_err;
+        errorBox.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    // Logout Handler
+    window.handleLogout = async function() {
+      try {
+        await signOut(auth);
+        resetForm();
+      } catch (err) {
+        showToast(translations[currentLang].toast_err, true);
+      }
+    };
+
+    // Live Image Preview
+    window.updateImagePreview = function() {
+      const url = document.getElementById('imageUrl').value.trim();
+      const preview = document.getElementById('imagePreview');
+      const fallback = 'https://placehold.co/800x450/121216/d4af37?text=MAFAP+PREVIEW';
+      preview.src = url || fallback;
+    };
+
+    // Fetch All Workshops from Firestore
+    async function fetchWorkshops() {
+      const listLoading = document.getElementById('listLoading');
+      const listEmpty = document.getElementById('listEmpty');
+      const grid = document.getElementById('adminWorkshopsGrid');
+
+      listLoading.classList.remove('hidden');
+      listEmpty.classList.add('hidden');
+      grid.innerHTML = '';
+
+      try {
+        const q = query(collection(db, 'workshops'), orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(q);
+        workshopsList = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderWorkshopsGrid();
+      } catch (err) {
+        console.error('Error fetching workshops:', err);
+        showToast(translations[currentLang].toast_err, true);
+      } finally {
+        listLoading.classList.add('hidden');
+      }
+    }
+
+    // Render Workshops List
+    function renderWorkshopsGrid() {
+      const grid = document.getElementById('adminWorkshopsGrid');
+      const listEmpty = document.getElementById('listEmpty');
+      const countBadge = document.getElementById('workshopsCountBadge');
+      const dict = translations[currentLang];
+
+      countBadge.textContent = workshopsList.length;
+
+      if (!workshopsList.length) {
+        listEmpty.classList.remove('hidden');
+        grid.innerHTML = '';
+        return;
+      }
+
+      listEmpty.classList.add('hidden');
+      const fallback = 'https://placehold.co/800x450/121216/d4af37?text=MAFAP+WORKSHOP';
+
+      grid.innerHTML = workshopsList.map(item => {
+        const titleAr = item.title?.ar || '';
+        const titleEn = item.title?.en || '';
+        const priceDisplay = item.price?.[currentLang] || item.price?.ar || item.price?.en || '';
+        const durationDisplay = item.duration?.[currentLang] || item.duration?.ar || item.duration?.en || '';
+
+        return `
+          <div class="glass-card rounded-3xl overflow-hidden flex flex-col justify-between">
+            <div>
+              <div class="relative aspect-video bg-obsidian">
+                <img 
+                  src="${item.image || fallback}" 
+                  onerror="this.src='${fallback}'"
+                  alt="${titleAr}" 
+                  class="w-full h-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent"></div>
+                ${durationDisplay ? `
+                  <span class="absolute top-3 start-3 px-3 py-1 rounded-full bg-obsidian/85 backdrop-blur-md text-amberGold border border-amberGold/30 font-bold text-xs">
+                    ${durationDisplay}
+                  </span>` : ''}
+                ${priceDisplay ? `
+                  <span class="absolute bottom-3 end-3 px-3 py-1 rounded-xl bg-amberGold text-zinc-950 font-extrabold text-xs shadow-lg">
+                    ${priceDisplay}
+                  </span>` : ''}
+              </div>
+
+              <div class="p-5">
+                <h3 class="text-base font-extrabold text-white mb-1">${titleAr}</h3>
+                <p class="text-xs font-english text-zinc-400" dir="ltr">${titleEn}</p>
+              </div>
+            </div>
+
+            <div class="px-5 pb-5 pt-3 border-t border-white/10 flex items-center gap-2.5">
+              <button onclick="startEditWorkshop('${item.id}')" class="flex-1 py-2.5 px-3 rounded-xl bg-amberGold/15 hover:bg-amberGold/25 text-amberGold border border-amberGold/30 font-bold text-xs transition-all">
+                ${dict.btn_edit}
+              </button>
+              <button onclick="promptDeleteWorkshop('${item.id}')" class="flex-1 py-2.5 px-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 font-bold text-xs transition-all">
+                ${dict.btn_delete}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Create or Update Workshop
+    window.handleSaveWorkshop = async function(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('saveWorkshopBtn');
+      saveBtn.disabled = true;
+
+      const payload = {
+        image: document.getElementById('imageUrl').value.trim(),
+        title: {
+          ar: document.getElementById('titleAr').value.trim(),
+          en: document.getElementById('titleEn').value.trim()
+        },
+        price: {
+          ar: document.getElementById('priceAr').value.trim(),
+          en: document.getElementById('priceEn').value.trim()
+        },
+        duration: {
+          ar: document.getElementById('durationAr').value.trim(),
+          en: document.getElementById('durationEn').value.trim()
+        },
+        summary: {
+          ar: document.getElementById('shortAr').value.trim(),
+          en: document.getElementById('shortEn').value.trim()
+        },
+        details: {
+          ar: document.getElementById('detailsAr').value.trim(),
+          en: document.getElementById('detailsEn').value.trim()
+        }
+      };
+
+      try {
+        if (editingId) {
+          await updateDoc(doc(db, 'workshops', editingId), payload);
+          showToast(translations[currentLang].toast_updated);
+        } else {
+          payload.createdAt = serverTimestamp();
+          await addDoc(collection(db, 'workshops'), payload);
+          showToast(translations[currentLang].toast_saved);
+        }
+        resetForm();
+        await fetchWorkshops();
+      } catch (err) {
+        console.error('Save error:', err);
+        showToast(translations[currentLang].toast_err, true);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    };
+
+    // Populate Form for Editing
+    window.startEditWorkshop = function(id) {
+      const item = workshopsList.find(w => w.id === id);
+      if (!item) return;
+
+      editingId = id;
+      document.getElementById('imageUrl').value = item.image || '';
+      updateImagePreview();
+
+      document.getElementById('titleAr').value = item.title?.ar || '';
+      document.getElementById('titleEn').value = item.title?.en || '';
+      document.getElementById('priceAr').value = item.price?.ar || '';
+      document.getElementById('priceEn').value = item.price?.en || '';
+      document.getElementById('durationAr').value = item.duration?.ar || '';
+      document.getElementById('durationEn').value = item.duration?.en || '';
+      document.getElementById('shortAr').value = item.summary?.ar || '';
+      document.getElementById('shortEn').value = item.summary?.en || '';
+      document.getElementById('detailsAr').value = item.details?.ar || '';
+      document.getElementById('detailsEn').value = item.details?.en || '';
+
+      document.getElementById('formHeading').textContent = translations[currentLang].form_title_edit;
+      document.getElementById('saveBtnText').textContent = translations[currentLang].btn_update;
+      document.getElementById('editModeBadge').classList.remove('hidden');
+      document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+      document.getElementById('formSection').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Reset Form to Add Mode
+    window.resetForm = function() {
+      editingId = null;
+      document.getElementById('workshopForm').reset();
+      updateImagePreview();
+
+      document.getElementById('formHeading').textContent = translations[currentLang].form_title_add;
+      document.getElementById('saveBtnText').textContent = translations[currentLang].btn_save;
+      document.getElementById('editModeBadge').classList.add('hidden');
+      document.getElementById('cancelEditBtn').classList.add('hidden');
+    };
+
+    // Open Delete Confirmation Modal
+    window.promptDeleteWorkshop = function(id) {
+      const item = workshopsList.find(w => w.id === id);
+      if (!item) return;
+
+      pendingDeleteId = id;
+      document.getElementById('deleteTargetName').textContent = item.title?.[currentLang] || item.title?.ar || item.title?.en || '';
+      const modal = document.getElementById('deleteModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    };
+
+    window.closeDeleteModal = function() {
+      pendingDeleteId = null;
+      const modal = document.getElementById('deleteModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    // Execute Delete in Firestore
+    window.executeDeleteWorkshop = async function() {
+      if (!pendingDeleteId) return;
+      const btn = document.getElementById('confirmDeleteBtn');
+      btn.disabled = true;
+
+      try {
+        await deleteDoc(doc(db, 'workshops', pendingDeleteId));
+        if (editingId === pendingDeleteId) resetForm();
+        closeDeleteModal();
+        showToast(translations[currentLang].toast_deleted);
+        await fetchWorkshops();
+      } catch (err) {
+        console.error('Delete error:', err);
+        showToast(translations[currentLang].toast_err, true);
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    // Toggle AR / EN
+    window.toggleLanguage = function() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      document.documentElement.setAttribute('lang', currentLang);
+      document.documentElement.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+
+      document.querySelectorAll('.lang-label').forEach(el => {
+        el.textContent = currentLang === 'ar' ? 'EN' : 'عربي';
+      });
+
+      const dict = translations[currentLang];
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) {
+          el.textContent = dict[key];
+        }
+      });
+
+      // Keep form heading & save button aligned with current edit state
+      document.getElementById('formHeading').textContent = editingId ? dict.form_title_edit : dict.form_title_add;
+      document.getElementById('saveBtnText').textContent = editingId ? dict.btn_update : dict.btn_save;
+
+      renderWorkshopsGrid();
+    };
+  </script>
+</body>
+</html>
