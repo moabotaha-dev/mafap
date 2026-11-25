@@ -126,8 +126,26 @@
     </div>
 
     <!-- ==================== 3. SIMPLE WORKSHOPS GRID ==================== -->
-    <div id="workshopsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-7">
-      <!-- Cards rendered cleanly by JS -->
+    <!-- Loading State -->
+    <div id="loadingState" class="flex flex-col items-center justify-center py-20">
+      <div class="w-10 h-10 border-4 border-amberGold/30 border-t-amberGold rounded-full animate-spin mb-4"></div>
+      <p class="text-zinc-400 text-sm" data-i18n="loading_text">جاري تحميل الورش والكورسات...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center glass-card rounded-3xl p-8 max-w-lg mx-auto">
+      <div class="w-14 h-14 rounded-2xl bg-amberGold/10 border border-amberGold/25 flex items-center justify-center text-amberGold mb-4">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+        </svg>
+      </div>
+      <p class="text-zinc-300 font-bold text-lg mb-1" data-i18n="empty_title">لا توجد ورش أو كورسات متاحة حالياً</p>
+      <p class="text-zinc-500 text-sm" data-i18n="empty_sub">تابع صفحاتنا لمعرفة مواعيد الدفعات القادمة.</p>
+    </div>
+
+    <!-- Dynamic Grid -->
+    <div id="workshopsGrid" class="hidden grid-cols-1 md:grid-cols-3 gap-7">
+      <!-- Cards rendered dynamically from Firestore -->
     </div>
 
   </main>
@@ -197,11 +215,11 @@
         <p id="modalDesc" class="text-zinc-300 text-sm leading-relaxed mb-4"></p>
         
         <!-- Concise Bullet Points -->
-        <ul id="modalBullets" class="space-y-2 text-xs sm:text-sm text-zinc-300 mb-6 bg-obsidian/70 p-4 rounded-2xl border border-white/10">
+        <ul id="modalBullets" class="hidden space-y-2 text-xs sm:text-sm text-zinc-300 mb-6 bg-obsidian/70 p-4 rounded-2xl border border-white/10">
         </ul>
 
         <!-- Actions -->
-        <div class="flex flex-col sm:flex-row items-center gap-3">
+        <div class="flex flex-col sm:flex-row items-center gap-3 mt-6">
           <a id="modalWhatsappBtn" href="#" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 px-6 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-zinc-950 font-extrabold text-sm transition-all flex items-center justify-center gap-2.5">
             <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
               <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm.029 18.88c-1.161 0-2.305-.292-3.318-.844l-3.677.964.984-3.595c-.607-1.052-.927-2.246-.926-3.468.001-3.825 3.113-6.937 6.937-6.937 1.856.001 3.598.723 4.907 2.034 1.31 1.311 2.031 3.054 2.03 4.908-.001 3.825-3.113 6.938-6.937 6.938z"/>
@@ -218,113 +236,42 @@
     </div>
   </div>
 
-  <!-- ==================== JAVASCRIPT ==================== -->
-  <script>
-    // ضع رقم واتساب الشركة هنا بالصيغة الدولية بدون + (مثال: 2010xxxxxxxx)
-    const WHATSAPP_NUMBER = '201000000000';
+  <!-- ==================== FIREBASE & JAVASCRIPT ==================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // بيانات الورش (عدّل الصور والأسعار والتفاصيل من هنا بسهولة)
-    const workshopsData = [
-      {
-        id: 'acting',
-        image: 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?auto=format&fit=crop&w=900&q=80',
-        fallback: 'https://placehold.co/800x450/121216/d4af37?text=ACTING+WORKSHOP',
-        duration: { ar: '8 محاضرات', en: '8 Sessions' },
-        price: { ar: '2,500 ج.م', en: '2,500 EGP' },
-        title: {
-          ar: 'ورشة التمثيل أمام الكاميرا',
-          en: 'Acting for Camera Workshop'
-        },
-        summary: {
-          ar: 'تدريب عملي على الأداء التمثيلي الطبيعي والتعامل مع الكاميرا.',
-          en: 'Practical training on natural screen acting and camera presence.'
-        },
-        details: {
-          ar: 'ورشة عملية تركز على كسر رهبة الكاميرا وبناء الشخصية وتصوير مشهد تخرج بإضاءة سينمائية.',
-          en: 'A practical workshop focusing on camera presence, character building, and filming a graduation scene.'
-        },
-        bullets: {
-          ar: [
-            'تحليل النص وبناء أبعاد الشخصية',
-            'التحكم في لغة الجسد ونبرة الصوت أمام العدسة',
-            'تصوير مشهد تخرج احترافي لكل متدرب'
-          ],
-          en: [
-            'Script breakdown & character development',
-            'Body language & vocal control for the lens',
-            'Professionally filmed graduation scene'
-          ]
-        }
-      },
-      {
-        id: 'filmmaking',
-        image: 'https://images.unsplash.com/photo-1585670210693-e7fdd16b142e?auto=format&fit=crop&w=900&q=80',
-        fallback: 'https://placehold.co/800x450/121216/d4af37?text=FILMMAKING+WORKSHOP',
-        duration: { ar: '10 محاضرات', en: '10 Sessions' },
-        price: { ar: '3,200 ج.م', en: '3,200 EGP' },
-        title: {
-          ar: 'ورشة صناعة الفيلم القصير',
-          en: 'Short Filmmaking Workshop'
-        },
-        summary: {
-          ar: 'تعلم خطوات صناعة الفيلم من الفكرة والسيناريو وحتى التصوير.',
-          en: 'Learn filmmaking steps from story concept and script to shooting.'
-        },
-        details: {
-          ar: 'رحلة تطبيقية متكاملة لتنفيذ فيلم قصير؛ من تطوير الفكرة وتقسيم اللقطات وحتى التصوير الفعلي.',
-          en: 'A hands-on journey to execute a short film—from story development and shot listing to on-set shooting.'
-        },
-        bullets: {
-          ar: [
-            'كتابة السيناريو وتقسيم اللقطات (Shot List)',
-            'أساسيات الإخراج وإدارة الممثلين في اللوكيشن',
-            'تنفيذ مشروع فيلم قصير جماعي بنهاية الورشة'
-          ],
-          en: [
-            'Screenwriting & shot listing essentials',
-            'Directing fundamentals & working with actors',
-            'Producing a group short film project'
-          ]
-        }
-      },
-      {
-        id: 'editing',
-        image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=900&q=80',
-        fallback: 'https://placehold.co/800x450/121216/d4af37?text=EDITING+%26+COLOR',
-        duration: { ar: '6 محاضرات', en: '6 Sessions' },
-        price: { ar: '2,000 ج.م', en: '2,000 EGP' },
-        title: {
-          ar: 'كورس المونتاج وتصحيح الألوان',
-          en: 'Editing & Color Grading Course'
-        },
-        summary: {
-          ar: 'إتقان السرد بالمونتاج وتدريج الألوان السينمائي على مشاهد حقيقية.',
-          en: 'Master narrative editing and cinematic color grading on real footage.'
-        },
-        details: {
-          ar: 'تدريب عملي على بناء إيقاع المشهد، هندسة الصوت الأساسية، وتصحيح الألوان السينمائي.',
-          en: 'Hands-on training on scene pacing, basic sound design, and cinematic color grading.'
-        },
-        bullets: {
-          ar: [
-            'بناء الإيقاع الدرامي والقطع السلس بين اللقطات',
-            'أساسيات تصحيح وتدريج الألوان (Color Grading)',
-            'تطبيق عملي على لقطات خام (RAW) من إنتاج MAFAP'
-          ],
-          en: [
-            'Dramatic pacing & seamless cutting techniques',
-            'Color correction & cinematic grading fundamentals',
-            'Hands-on practice with raw MAFAP footage'
-          ]
-        }
-      }
-    ];
+    // =========================================================================
+    // ضع إعدادات مشروع Firebase الخاصة بك هنا (من Project Settings في Firebase)
+    // PASTE YOUR FIREBASE CONFIG OBJECT BELOW
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // رقم الواتساب الافتراضي (يتم تحديثه تلقائياً إذا تم ضبطه في لوحة الأدمن)
+    let whatsappNumber = '201014890759';
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let workshopsData = [];
+    let currentLang = 'ar';
+    let activeId = null;
 
     const translations = {
       ar: {
         nav_back: 'الموقع الرئيسي',
         page_title: 'ورش وكورسات MAFAP',
         page_subtitle: 'برامج تدريبية عملية في صناعة السينما والتمثيل بإشراف شركة مصطفى ابوطه للإنتاج الفني.',
+        loading_text: 'جاري تحميل الورش والكورسات...',
+        empty_title: 'لا توجد ورش أو كورسات متاحة حالياً',
+        empty_sub: 'تابع صفحاتنا لمعرفة مواعيد الدفعات القادمة.',
         card_btn: 'التفاصيل والحجز',
         btn_whatsapp: 'احجز عبر واتساب',
         btn_close: 'إغلاق',
@@ -335,6 +282,9 @@
         nav_back: 'Main Website',
         page_title: 'MAFAP Workshops & Courses',
         page_subtitle: 'Practical cinema and acting workshops supervised by Mostafa Abotaha for Artistic Production.',
+        loading_text: 'Loading workshops & courses...',
+        empty_title: 'No workshops or courses available at the moment',
+        empty_sub: 'Follow our official channels for upcoming schedules.',
         card_btn: 'Details & Booking',
         btn_whatsapp: 'Book via WhatsApp',
         btn_close: 'Close',
@@ -343,92 +293,173 @@
       }
     };
 
-    let currentLang = 'ar';
-    let activeId = null;
+    // جلب رقم الواتساب من إعدادات Firestore إن وجد
+    async function loadSettings() {
+      try {
+        const snap = await getDoc(doc(db, 'settings', 'general'));
+        if (snap.exists() && snap.data().whatsapp) {
+          whatsappNumber = snap.data().whatsapp;
+        }
+      } catch (err) {
+        console.warn('Using default WhatsApp number:', err);
+      }
+    }
+
+    // الاستماع المباشر لمجموعة الورش 'workshops' في Firestore
+    function initWorkshopsListener() {
+      const q = query(collection(db, 'workshops'), orderBy('createdAt', 'desc'));
+      onSnapshot(q, (snapshot) => {
+        document.getElementById('loadingState').classList.add('hidden');
+        workshopsData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderWorkshops();
+      }, (error) => {
+        console.error('Firestore Error:', error);
+        document.getElementById('loadingState').classList.add('hidden');
+        workshopsData = [];
+        renderWorkshops();
+      });
+    }
+
+    function getLocalizedField(item, field) {
+      if (!item || !item[field]) return '';
+      if (typeof item[field] === 'object') {
+        return item[field][currentLang] || item[field].ar || item[field].en || '';
+      }
+      return item[field];
+    }
 
     function renderWorkshops() {
       const grid = document.getElementById('workshopsGrid');
+      const emptyState = document.getElementById('emptyState');
       const btnText = translations[currentLang].card_btn;
 
-      grid.innerHTML = workshopsData.map(item => `
-        <article onclick="openModal('${item.id}')" class="glass-card rounded-3xl overflow-hidden flex flex-col cursor-pointer group">
-          <div class="relative aspect-video bg-obsidian overflow-hidden">
-            <img 
-              src="${item.image}" 
-              onerror="this.src='${item.fallback}'"
-              alt="${item.title[currentLang]}" 
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent"></div>
-            <span class="absolute top-3 start-4 px-3 py-1 rounded-full bg-obsidian/85 backdrop-blur-md text-amberGold border border-amberGold/30 font-bold text-xs">
-              ${item.duration[currentLang]}
-            </span>
-            <span class="absolute bottom-3 end-4 px-3.5 py-1.5 rounded-xl bg-amberGold text-zinc-950 font-extrabold text-sm shadow-lg">
-              ${item.price[currentLang]}
-            </span>
-          </div>
+      if (!workshopsData.length) {
+        grid.classList.add('hidden');
+        grid.classList.remove('grid');
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+        return;
+      }
 
-          <div class="p-6 flex-1 flex flex-col justify-between">
-            <div>
-              <h2 class="text-xl font-bold text-white group-hover:text-amberGold transition-colors mb-2">
-                ${item.title[currentLang]}
-              </h2>
-              <p class="text-zinc-400 text-sm leading-relaxed mb-5">
-                ${item.summary[currentLang]}
-              </p>
+      emptyState.classList.add('hidden');
+      emptyState.classList.remove('flex');
+      grid.classList.remove('hidden');
+      grid.classList.add('grid');
+
+      grid.innerHTML = workshopsData.map(item => {
+        const title = getLocalizedField(item, 'title');
+        const summary = getLocalizedField(item, 'summary');
+        const price = getLocalizedField(item, 'price');
+        const duration = getLocalizedField(item, 'duration');
+        const fallback = 'https://placehold.co/800x450/121216/d4af37?text=MAFAP+WORKSHOP';
+
+        return `
+          <article onclick="openModal('${item.id}')" class="glass-card rounded-3xl overflow-hidden flex flex-col cursor-pointer group">
+            <div class="relative aspect-video bg-obsidian overflow-hidden">
+              <img 
+                src="${item.image || fallback}" 
+                onerror="this.src='${fallback}'"
+                alt="${title}" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent"></div>
+              ${duration ? `
+                <span class="absolute top-3 start-4 px-3 py-1 rounded-full bg-obsidian/85 backdrop-blur-md text-amberGold border border-amberGold/30 font-bold text-xs">
+                  ${duration}
+                </span>` : ''}
+              ${price ? `
+                <span class="absolute bottom-3 end-4 px-3.5 py-1.5 rounded-xl bg-amberGold text-zinc-950 font-extrabold text-sm shadow-lg">
+                  ${price}
+                </span>` : ''}
             </div>
 
-            <div class="pt-3 border-t border-white/10 flex items-center justify-between text-amberGold text-sm font-bold">
-              <span>${btnText}</span>
-              <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-              </svg>
+            <div class="p-6 flex-1 flex flex-col justify-between">
+              <div>
+                <h2 class="text-xl font-bold text-white group-hover:text-amberGold transition-colors mb-2">
+                  ${title}
+                </h2>
+                <p class="text-zinc-400 text-sm leading-relaxed mb-5">
+                  ${summary}
+                </p>
+              </div>
+
+              <div class="pt-3 border-t border-white/10 flex items-center justify-between text-amberGold text-sm font-bold">
+                <span>${btnText}</span>
+                <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+              </div>
             </div>
-          </div>
-        </article>
-      `).join('');
+          </article>
+        `;
+      }).join('');
     }
 
-    function openModal(id) {
+    window.openModal = function(id) {
       const item = workshopsData.find(w => w.id === id);
       if (!item) return;
 
       activeId = id;
+      const fallback = 'https://placehold.co/800x450/121216/d4af37?text=MAFAP+WORKSHOP';
       const img = document.getElementById('modalImg');
-      img.src = item.image;
-      img.onerror = () => { img.src = item.fallback; };
+      img.src = item.image || fallback;
+      img.onerror = () => { img.src = fallback; };
 
-      document.getElementById('modalDuration').textContent = item.duration[currentLang];
-      document.getElementById('modalPrice').textContent = item.price[currentLang];
-      document.getElementById('modalTitle').textContent = item.title[currentLang];
-      document.getElementById('modalDesc').textContent = item.details[currentLang];
-      document.getElementById('modalBullets').innerHTML = item.bullets[currentLang]
-        .map(point => `<li class="flex items-start gap-2"><span class="text-amberGold font-bold">•</span><span>${point}</span></li>`)
-        .join('');
+      const duration = getLocalizedField(item, 'duration');
+      const price = getLocalizedField(item, 'price');
+      const title = getLocalizedField(item, 'title');
+      const details = getLocalizedField(item, 'details') || getLocalizedField(item, 'summary');
 
+      const durEl = document.getElementById('modalDuration');
+      durEl.textContent = duration;
+      durEl.classList.toggle('hidden', !duration);
+
+      const priceEl = document.getElementById('modalPrice');
+      priceEl.textContent = price;
+      priceEl.classList.toggle('hidden', !price);
+
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalDesc').textContent = details;
+
+      const bulletsEl = document.getElementById('modalBullets');
+      const bulletsList = item.bullets && Array.isArray(item.bullets[currentLang])
+        ? item.bullets[currentLang]
+        : (Array.isArray(item.bullets) ? item.bullets : []);
+
+      if (bulletsList.length) {
+        bulletsEl.classList.remove('hidden');
+        bulletsEl.innerHTML = bulletsList
+          .map(point => `<li class="flex items-start gap-2"><span class="text-amberGold font-bold">•</span><span>${point}</span></li>`)
+          .join('');
+      } else {
+        bulletsEl.classList.add('hidden');
+        bulletsEl.innerHTML = '';
+      }
+
+      const titleAr = getLocalizedField(item, 'title');
       const msg = currentLang === 'ar'
-        ? `مرحباً MAFAP، أريد الاستفسار والحجز في: ${item.title.ar} (${item.price.ar})`
-        : `Hello MAFAP, I want to inquire and book: ${item.title.en} (${item.price.en})`;
+        ? `مرحباً MAFAP، أريد الاستفسار والحجز في: ${titleAr} ${price ? '(' + price + ')' : ''}`
+        : `Hello MAFAP, I want to inquire and book: ${title} ${price ? '(' + price + ')' : ''}`;
 
-      document.getElementById('modalWhatsappBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+      document.getElementById('modalWhatsappBtn').href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
 
       const modal = document.getElementById('workshopModal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
-    }
+    };
 
-    function closeModal() {
+    window.closeModal = function() {
       const modal = document.getElementById('workshopModal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       activeId = null;
-    }
+    };
 
     document.getElementById('workshopModal').addEventListener('click', (e) => {
-      if (e.target.id === 'workshopModal') closeModal();
+      if (e.target.id === 'workshopModal') window.closeModal();
     });
 
-    function toggleLanguage() {
+    window.toggleLanguage = function() {
       currentLang = currentLang === 'ar' ? 'en' : 'ar';
       document.documentElement.setAttribute('lang', currentLang);
       document.documentElement.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
@@ -442,10 +473,13 @@
       });
 
       renderWorkshops();
-      if (activeId) openModal(activeId);
-    }
+      if (activeId) window.openModal(activeId);
+    };
 
-    window.addEventListener('DOMContentLoaded', renderWorkshops);
+    window.addEventListener('DOMContentLoaded', () => {
+      loadSettings();
+      initWorkshopsListener();
+    });
   </script>
 </body>
 </html>
